@@ -1,0 +1,3220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>千问开放平台 - 商家入驻控制台 交互线框图</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f7f8fc; color: #333; font-size: 14px; }
+
+/* Layout */
+.app { display: flex; height: 100vh; }
+.sidebar { width: 220px; background: #fff; border-right: 1px solid #eef0f5; flex-shrink: 0; display: flex; flex-direction: column; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { height: 56px; background: #fff; border-bottom: 1px solid #eef0f5; display: flex; align-items: center; padding: 0 24px; justify-content: space-between; }
+.content { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* Sidebar */
+.sidebar-brand { padding: 20px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #eef0f5; }
+.sidebar-brand .logo { width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 700; }
+.sidebar-brand .name { font-size: 14px; font-weight: 600; color: #1e1e2d; }
+.sidebar-brand .sub { font-size: 11px; color: #999; }
+
+.nav-group { padding: 16px 0; }
+.nav-group-title { padding: 4px 16px 8px; font-size: 11px; color: #aaa; font-weight: 500; }
+.nav-item { padding: 9px 16px 9px 20px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: #555; transition: all 0.15s; border-right: 3px solid transparent; }
+.nav-item:hover { background: #f5f3ff; color: #6366f1; }
+.nav-item.active { background: #f0eeff; color: #6366f1; font-weight: 500; border-right-color: #6366f1; }
+.nav-item .icon { width: 16px; text-align: center; font-size: 14px; }
+.nav-item .badge { margin-left: auto; background: #fee2e2; color: #dc2626; font-size: 11px; padding: 1px 6px; border-radius: 10px; }
+
+/* Topbar */
+.topbar-title { font-size: 15px; font-weight: 600; color: #1e1e2d; }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.topbar-right .cert-badge { font-size: 12px; padding: 3px 10px; border-radius: 12px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+
+/* Pages */
+.page { display: none; }
+.page.active { display: block; }
+
+/* Onboarding Progress */
+.progress-bar-wrap { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.progress-steps { display: flex; align-items: center; justify-content: space-between; position: relative; }
+.progress-steps::before { content: ''; position: absolute; top: 20px; left: 40px; right: 40px; height: 2px; background: #e5e7eb; z-index: 0; }
+.progress-step { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; z-index: 1; }
+.progress-step .circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; background: #e5e7eb; color: #999; cursor: pointer; transition: all 0.2s; }
+.progress-step .circle:hover { transform: scale(1.1); }
+.progress-step.done .circle { background: #6366f1; color: #fff; }
+.progress-step.current .circle { background: #fff; color: #6366f1; border: 2px solid #6366f1; box-shadow: 0 0 0 4px rgba(99,102,241,0.15); }
+.progress-step .label { font-size: 12px; color: #666; text-align: center; max-width: 70px; }
+.progress-step.done .label { color: #6366f1; }
+.progress-step.current .label { color: #6366f1; font-weight: 500; }
+.progress-collapse { text-align: right; margin-top: 12px; }
+.progress-collapse a { font-size: 12px; color: #6366f1; cursor: pointer; text-decoration: none; }
+
+/* Stat Cards */
+.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.stat-card .num { font-size: 28px; font-weight: 700; color: #1e1e2d; }
+.stat-card .desc { font-size: 13px; color: #888; margin-top: 4px; }
+.stat-card .sub-row { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #666; }
+.stat-card .sub-row span { padding: 2px 8px; background: #f3f4f6; border-radius: 4px; }
+
+/* Common UI */
+.card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 20px; }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+.btn { padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #d1d5db; background: #fff; color: #374151; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: #6366f1; color: #6366f1; }
+.btn-primary { background: #6366f1; color: #fff; border-color: #6366f1; }
+.btn-primary:hover { background: #4f46e5; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-danger { color: #dc2626; border-color: #fca5a5; }
+.btn-ghost { border: none; background: none; color: #6366f1; padding: 4px 8px; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 11px 14px; text-align: left; font-size: 13px; border-bottom: 1px solid #f3f4f6; }
+th { background: #fafbfc; font-weight: 500; color: #6b7280; white-space: nowrap; }
+tr:hover td { background: #fafaff; }
+
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.tag-draft { background: #f3f4f6; color: #6b7280; }
+.tag-debug { background: #fef3c7; color: #92400e; }
+.tag-review { background: #dbeafe; color: #1e40af; }
+.tag-rejected { background: #fee2e2; color: #dc2626; }
+.tag-ready { background: #d1fae5; color: #065f46; }
+.tag-online { background: #ecfdf5; color: #059669; }
+.tag-offline { background: #f3f4f6; color: #6b7280; }
+.tag-prepub { background: #ede9fe; color: #6d28d9; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; border-bottom: 2px solid #f3f4f6; margin-bottom: 20px; }
+.tab-item { padding: 10px 20px; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: #6b7280; }
+.tab-item.active { color: #6366f1; border-bottom-color: #6366f1; font-weight: 500; }
+.tab-item:hover { color: #6366f1; }
+
+/* Forms */
+.form-section { margin-bottom: 24px; }
+.form-section-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f3f4f6; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 12px; color: #6b7280; margin-bottom: 5px; display: block; }
+.form-label .required { color: #dc2626; margin-left: 2px; }
+.form-input { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
+.form-input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+.form-textarea { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; min-height: 80px; resize: vertical; }
+.form-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+.form-upload { border: 2px dashed #d1d5db; border-radius: 8px; padding: 24px; text-align: center; color: #9ca3af; cursor: pointer; transition: all 0.2s; }
+.form-upload:hover { border-color: #6366f1; color: #6366f1; background: #fafaff; }
+
+/* Drawer */
+.drawer-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.35); z-index: 1000; }
+.drawer-overlay.show { display: flex; justify-content: flex-end; }
+.drawer { width: 720px; height: 100vh; background: #fff; box-shadow: -4px 0 24px rgba(0,0,0,0.08); display: flex; flex-direction: column; }
+.drawer-header { padding: 20px 24px; border-bottom: 1px solid #eef0f5; display: flex; align-items: center; justify-content: space-between; }
+.drawer-header h3 { font-size: 16px; font-weight: 600; }
+.drawer-close { width: 28px; height: 28px; border: none; background: #f3f4f6; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.drawer-body { flex: 1; overflow-y: auto; padding: 24px; }
+.drawer-footer { padding: 16px 24px; border-top: 1px solid #eef0f5; display: flex; gap: 12px; justify-content: flex-end; }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1100; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 12px; width: 520px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+.modal-header { padding: 20px 24px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
+.modal-header h3 { font-size: 16px; font-weight: 600; }
+.modal-body { padding: 24px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid #f3f4f6; display: flex; gap: 12px; justify-content: flex-end; }
+
+/* Annotation */
+.wireframe-note { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 12px; color: #1e40af; line-height: 1.6; }
+.wireframe-note strong { color: #6366f1; }
+
+/* Step indicator */
+.step-indicator { display: flex; align-items: center; gap: 0; margin-bottom: 24px; }
+.step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: #e5e7eb; color: #9ca3af; }
+.step-dot.active { background: #6366f1; color: #fff; }
+.step-dot.done { background: #d1fae5; color: #059669; }
+.step-line { flex: 1; height: 2px; background: #e5e7eb; }
+.step-line.done { background: #6366f1; }
+.step-labels { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: #9ca3af; }
+
+/* KB item */
+.kb-item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; transition: all 0.15s; }
+.kb-item:hover { border-color: #6366f1; box-shadow: 0 2px 8px rgba(99,102,241,0.08); }
+.kb-icon { width: 36px; height: 36px; background: #ede9fe; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6366f1; font-size: 16px; }
+.kb-info { flex: 1; }
+.kb-info .name { font-size: 13px; font-weight: 500; }
+.kb-info .meta { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+/* Code block */
+.code-block { background: #1e1e2d; color: #a5b4fc; padding: 14px 16px; border-radius: 8px; font-size: 12px; font-family: 'JetBrains Mono', 'Fira Code', monospace; overflow-x: auto; white-space: pre-wrap; max-height: 240px; overflow-y: auto; }
+
+/* Debug console mock */
+.debug-panel { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+.debug-header { background: #fafbfc; padding: 10px 14px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 12px; }
+.debug-body { padding: 14px; min-height: 200px; }
+.debug-msg { margin-bottom: 12px; display: flex; gap: 8px; }
+.debug-msg .avatar { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.debug-msg .bubble { padding: 8px 12px; border-radius: 8px; font-size: 13px; max-width: 80%; }
+.debug-msg.user .avatar { background: #dbeafe; color: #1e40af; }
+.debug-msg.user .bubble { background: #eff6ff; }
+.debug-msg.bot .avatar { background: #ede9fe; color: #6d28d9; }
+.debug-msg.bot .bubble { background: #f5f3ff; }
+
+/* 创建 Skill 向导 - 方式卡片 */
+.cs-method-card { display:block; border:1px solid #e5e7eb; border-radius:8px; padding:14px; cursor:pointer; transition:all .15s; background:#fff; }
+.cs-method-card:hover { border-color:#a5b4fc; background:#fafbff; }
+.cs-method-card.cs-selected { border-color:#6366f1; background:#eef2ff; box-shadow:0 0 0 3px rgba(99,102,241,0.08); }
+.cs-tpl-item { display:flex; align-items:center; gap:6px; font-size:12px; padding:6px 8px; background:#fff; border:1px solid #e5e7eb; border-radius:4px; cursor:pointer; }
+.cs-approach-card { display:block; border:1px solid #e5e7eb; border-radius:8px; padding:14px; cursor:pointer; margin-bottom:10px; transition:all .15s; background:#fff; }
+.cs-approach-card:hover { border-color:#a5b4fc; }
+.cs-approach-card.cs-selected { border-color:#6366f1; background:#eef2ff; }
+
+/* 状态生命周期时间线 */
+.lifecycle { display:flex; align-items:center; gap:0; margin:12px 0 16px; padding:10px 12px; background:#f9fafb; border-radius:8px; }
+.lifecycle .lc-node { display:flex; flex-direction:column; align-items:center; flex:0 0 auto; }
+.lifecycle .lc-dot { width:22px; height:22px; border-radius:50%; background:#e5e7eb; color:#9ca3af; font-size:11px; display:flex; align-items:center; justify-content:center; }
+.lifecycle .lc-dot.done { background:#059669; color:#fff; }
+.lifecycle .lc-dot.cur { background:#6366f1; color:#fff; box-shadow:0 0 0 4px rgba(99,102,241,.15); }
+.lifecycle .lc-text { font-size:11px; color:#9ca3af; margin-top:4px; white-space:nowrap; }
+.lifecycle .lc-text.done { color:#059669; }
+.lifecycle .lc-text.cur { color:#6366f1; font-weight:500; }
+.lifecycle .lc-line { flex:1; height:2px; background:#e5e7eb; margin:0 4px; margin-bottom:18px; }
+.lifecycle .lc-line.done { background:#059669; }
+
+/* Toast 轻提示 */
+#toastHost { position:fixed; top:24px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
+.toast { min-width:240px; max-width:480px; padding:10px 16px; border-radius:8px; background:#1f2937; color:#fff; font-size:13px; box-shadow:0 8px 24px rgba(0,0,0,.18); display:flex; align-items:center; gap:8px; opacity:0; transform:translateY(-8px); transition:opacity .2s, transform .2s; }
+.toast.show { opacity:1; transform:translateY(0); }
+.toast.success { background:#059669; }
+.toast.warn { background:#d97706; }
+.toast.error { background:#dc2626; }
+.toast.info { background:#2563eb; }
+.toast .toast-icon { font-size:14px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo">Q</div>
+      <div>
+        <div class="name">千问开放平台</div>
+        <div class="sub">商家控制台</div>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item active" onclick="goPage('home')"><span class="icon">&#9633;</span> 控制台首页</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">入驻管理</div>
+      <div class="nav-item" onclick="goPage('account')"><span class="icon">&#9823;</span> 账号与资质</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">能力管理</div>
+      <div class="nav-item" onclick="goPage('skills')"><span class="icon">&#9881;</span> Skill 管理</div>
+      <div class="nav-item" onclick="goPage('kb')"><span class="icon">&#9776;</span> 知识库管理</div>
+      <div class="nav-item" onclick="goPage('recallTest')" style="padding-left:36px;font-size:12px;"><span class="icon">&#128269;</span> 召回测试</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">调试</div>
+      <div class="nav-item" onclick="goPage('skillDebug')"><span class="icon">&#9881;</span> Skill 调试</div>
+      <div class="nav-item" onclick="goPage('e2eDebug')"><span class="icon">&#128241;</span> 端到端调试</div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topTitle">控制台首页</div>
+      <div class="topbar-right">
+        <span class="cert-badge">&#10003; 已认证</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:28px;height:28px;background:#6366f1;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;">SF</div>
+          <span style="font-size:13px;font-weight:500;">顺丰速运</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ===== PAGE: 控制台首页 ===== -->
+      <div class="page active" id="page-home">
+        <div class="wireframe-note">
+          <strong>页面说明（控制台首页）：</strong>商家登录后的默认首页。展示入驻进度条引导当前阶段、运营资产汇总卡。进度条各节点可点击跳转对应页面，完成上架后可折叠。
+        </div>
+
+        <!-- 入驻进度 -->
+        <div class="progress-bar-wrap">
+          <div style="font-size:14px;font-weight:600;margin-bottom:16px;">入驻进度</div>
+          <div class="progress-steps">
+            <div class="progress-step done" onclick="goPage('account')">
+              <div class="circle">1</div>
+              <div class="label">注册</div>
+            </div>
+            <div class="progress-step done" onclick="goPage('qualSubmit')">
+              <div class="circle">2</div>
+              <div class="label">资质认证</div>
+            </div>
+            <div class="progress-step done" onclick="goPage('skills')">
+              <div class="circle">3</div>
+              <div class="label">创建 Skill</div>
+            </div>
+            <div class="progress-step current" onclick="goPage('skillDebug')">
+              <div class="circle">4</div>
+              <div class="label">调试评测</div>
+            </div>
+            <div class="progress-step">
+              <div class="circle">5</div>
+              <div class="label">提交审核</div>
+            </div>
+            <div class="progress-step">
+              <div class="circle">6</div>
+              <div class="label">上架</div>
+            </div>
+          </div>
+          <div class="progress-collapse"><a>收起进度 &#9650;</a></div>
+        </div>
+
+        <!-- 状态汇总卡 -->
+        <div class="stat-row">
+          <div class="stat-card" onclick="goPage('skills')" style="cursor:pointer;">
+            <div class="num">4</div>
+            <div class="desc">Skill 总数</div>
+            <div class="sub-row">
+              <span>已上架 1</span><span>审核中 1</span><span>草稿 2</span>
+            </div>
+          </div>
+          <div class="stat-card" onclick="goPage('kb')" style="cursor:pointer;">
+            <div class="num">2</div>
+            <div class="desc">知识库</div>
+            <div class="sub-row">
+              <span>已生效 1</span><span>审核中 1</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="num">8</div>
+            <div class="desc">知识库文件数</div>
+            <div class="sub-row">
+              <span>Excel 3</span><span>PDF 2</span><span>其他 3</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 快速操作 -->
+        <div class="card">
+          <div class="card-title">快速开始</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="openModal('genSkill')">+ 从知识库创建 Skill</button>
+            <button class="btn" onclick="openModal('importSkill')">&#8593; 导入 Skill 文件</button>
+            <button class="btn" onclick="goPage('kb')">+ 创建知识库</button>
+            <button class="btn" onclick="goPage('skillDebug')">进入调试</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PAGE: 提交入驻审核 ===== -->
+      <div class="page" id="page-qualSubmit">
+        <!-- 顶部进度条 -->
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:20px 24px;margin-bottom:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div>
+              <h3 style="margin:0;font-size:16px;">入驻审核进度</h3>
+              <div style="font-size:12px;color:#6b7280;margin-top:4px;">完整提交后平台将在 1-3 个工作日内完成审核</div>
+            </div>
+            <span class="tag" style="background:#fef3c7;color:#92400e;">待提交</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0;">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <div style="width:32px;height:32px;border-radius:50%;background:#6366f1;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;">1</div>
+              <div style="font-size:12px;color:#6366f1;font-weight:500;">填写资质材料</div>
+            </div>
+            <div style="flex:1;height:2px;background:#e5e7eb;margin-top:-22px;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <div style="width:32px;height:32px;border-radius:50%;background:#e5e7eb;color:#9ca3af;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;">2</div>
+              <div style="font-size:12px;color:#9ca3af;">提交审核</div>
+            </div>
+            <div style="flex:1;height:2px;background:#e5e7eb;margin-top:-22px;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <div style="width:32px;height:32px;border-radius:50%;background:#e5e7eb;color:#9ca3af;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;">3</div>
+              <div style="font-size:12px;color:#9ca3af;">平台审核中</div>
+            </div>
+            <div style="flex:1;height:2px;background:#e5e7eb;margin-top:-22px;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <div style="width:32px;height:32px;border-radius:50%;background:#e5e7eb;color:#9ca3af;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;">4</div>
+              <div style="font-size:12px;color:#9ca3af;">入驻完成</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 提示 banner -->
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:12px;color:#1e3a8a;line-height:1.7;">
+          <strong>&#9432; 填写说明：</strong>请如实填写企业资质信息，所有材料须清晰可辨；标 <span style="color:#dc2626;">*</span> 项必填。营业执照上传后系统将自动 OCR 识别并回填基础信息，可手动校正。
+        </div>
+
+        <!-- 表单主体 -->
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:24px;">
+
+          <!-- ① 企业主体信息 -->
+          <div class="form-section">
+            <div class="form-section-title" style="font-size:15px;display:flex;align-items:center;gap:8px;">
+              <span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:#6366f1;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;">1</span>
+              企业主体信息
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">营业执照<span class="required">*</span></div>
+              <div class="form-upload" style="padding:24px;border:2px dashed #d1d5db;border-radius:8px;text-align:center;cursor:pointer;background:#fafbfc;" onclick="toast('已打开营业执照上传选择器，上传后将自动 OCR 识别企业全称/统一社会信用代码/法定代表人/注册地址','info')">
+                <div style="font-size:32px;margin-bottom:6px;">📄</div>
+                <div style="font-size:13px;color:#374151;margin-bottom:4px;"><strong>点击或拖拽上传营业执照</strong></div>
+                <div style="font-size:11px;color:#9ca3af;">支持 JPG / PNG / PDF · ≤ 5MB · 上传后自动 OCR 回填基础信息</div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">企业全称<span class="required">*</span></div>
+                <input class="form-input" placeholder="须与营业执照完全一致">
+                <div class="form-hint">系统将自动校验与营业执照一致性</div>
+              </div>
+              <div class="form-group">
+                <div class="form-label">统一社会信用代码<span class="required">*</span></div>
+                <input class="form-input" placeholder="18 位">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">法定代表人<span class="required">*</span></div>
+                <input class="form-input">
+              </div>
+              <div class="form-group">
+                <div class="form-label">企业类型<span class="required">*</span></div>
+                <select class="form-input">
+                  <option>请选择</option>
+                  <option>有限责任公司</option>
+                  <option>股份有限公司</option>
+                  <option>个人独资企业</option>
+                  <option>合伙企业</option>
+                  <option>外商投资企业</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">注册资本（万元）<span class="required">*</span></div>
+                <input class="form-input" type="number" placeholder="如 5000">
+              </div>
+              <div class="form-group">
+                <div class="form-label">营业执照有效期<span class="required">*</span></div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <input class="form-input" type="date" style="flex:1;">
+                  <span style="color:#9ca3af;">至</span>
+                  <input class="form-input" type="date" style="flex:1;">
+                  <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#6b7280;white-space:nowrap;">
+                    <input type="checkbox"> 长期
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">注册地址<span class="required">*</span></div>
+              <input class="form-input" placeholder="须与营业执照完全一致">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">经营范围<span class="required">*</span></div>
+              <textarea class="form-textarea" style="min-height:60px;" placeholder="取自营业执照"></textarea>
+            </div>
+          </div>
+
+          <!-- ② 品牌权属 -->
+          <div class="form-section">
+            <div class="form-section-title" style="font-size:15px;display:flex;align-items:center;gap:8px;">
+              <span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:#6366f1;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;">2</span>
+              品牌权属
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">品牌中文名<span class="required">*</span></div>
+                <input class="form-input" placeholder="C 端展示的品牌名">
+                <div class="form-hint">用于生成 Skill slug 前缀（如 shunfeng_）</div>
+              </div>
+              <div class="form-group">
+                <div class="form-label">品牌英文名 / 拼音<span class="required">*</span></div>
+                <input class="form-input" placeholder="如 shunfeng">
+                <div class="form-hint">仅小写英文/数字，将作为 slug 前缀（不可修改）</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">品牌 Logo<span class="required">*</span></div>
+              <div style="display:flex;align-items:center;gap:14px;">
+                <div style="width:80px;height:80px;border:2px dashed #d1d5db;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:24px;background:#fafbfc;">+</div>
+                <div>
+                  <button class="btn btn-sm" onclick="toast('已打开 Logo 上传选择器','info')">&#11014; 上传 Logo</button>
+                  <div style="font-size:11px;color:#9ca3af;margin-top:6px;line-height:1.6;">建议 PNG/JPG · 1:1 · ≥ 200×200 · ≤ 200KB · 透明底优先</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">商标注册证 / 品牌授权书<span class="required">*</span></div>
+              <div class="form-upload" style="padding:16px;border:1px dashed #d1d5db;border-radius:8px;text-align:center;cursor:pointer;background:#fafbfc;">
+                <div style="font-size:13px;color:#374151;">📎 点击上传商标注册证或品牌授权书</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:4px;">非自有品牌须上传品牌方授权书 · JPG/PNG/PDF · ≤ 10MB</div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">品牌官网</div>
+                <input class="form-input" placeholder="https://">
+              </div>
+              <div class="form-group">
+                <div class="form-label">官方客服电话<span class="required">*</span></div>
+                <input class="form-input" placeholder="如 95338">
+              </div>
+            </div>
+          </div>
+
+          <!-- ③ 经营类目与行业资质 -->
+          <div class="form-section">
+            <div class="form-section-title" style="font-size:15px;display:flex;align-items:center;gap:8px;">
+              <span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:#6366f1;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;">3</span>
+              经营类目与行业资质
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">一级类目<span class="required">*</span></div>
+                <select class="form-input" onchange="toast('已联动二级类目，部分类目须补充行业资质','info')">
+                  <option>请选择一级类目</option>
+                  <option>物流快递</option>
+                  <option>航空出行</option>
+                  <option>餐饮服务</option>
+                  <option>本地生活</option>
+                  <option>数码电子</option>
+                  <option>金融服务</option>
+                  <option>教育培训</option>
+                  <option>医疗健康</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <div class="form-label">二级类目<span class="required">*</span></div>
+                <select class="form-input">
+                  <option>请先选择一级类目</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 类目联动后展示的资质要求清单 -->
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:500;color:#92400e;margin-bottom:8px;">⚠ 当前类目须补充以下资质（根据一级类目自动联动）：</div>
+              <ul style="margin:0;padding-left:18px;font-size:12px;color:#78350f;line-height:1.8;">
+                <li>快递业务经营许可证（物流快递类目必填）</li>
+                <li>道路运输经营许可证（如涉及自营车队）</li>
+                <li>ICP 备案号（如涉及在线服务）</li>
+              </ul>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">行业经营许可证<span class="required">*</span></div>
+              <div class="form-upload" style="padding:16px;border:1px dashed #d1d5db;border-radius:8px;text-align:center;cursor:pointer;background:#fafbfc;">
+                <div style="font-size:13px;color:#374151;">📎 上传行业经营许可证</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:4px;">支持多文件上传 · JPG/PNG/PDF · 单个 ≤ 10MB</div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">ICP 备案号</div>
+                <input class="form-input" placeholder="如 京 ICP 备 12345678 号">
+              </div>
+              <div class="form-group">
+                <div class="form-label">公安网备案号</div>
+                <input class="form-input" placeholder="如 京公网安备 11010102000123 号">
+              </div>
+            </div>
+          </div>
+
+          <!-- ④ 联系人信息 -->
+          <div class="form-section">
+            <div class="form-section-title" style="font-size:15px;display:flex;align-items:center;gap:8px;">
+              <span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:#6366f1;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;">4</span>
+              联系人信息
+              <span style="font-size:11px;color:#9ca3af;font-weight:400;">（用于审核结果通知与后续运营对接）</span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">对接人姓名<span class="required">*</span></div>
+                <input class="form-input">
+              </div>
+              <div class="form-group">
+                <div class="form-label">职位 / 部门<span class="required">*</span></div>
+                <input class="form-input" placeholder="如 技术总监 / 商务运营部">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">手机号<span class="required">*</span></div>
+                <div style="display:flex;gap:8px;">
+                  <input class="form-input" placeholder="11 位手机号" style="flex:1;">
+                  <button class="btn btn-sm" onclick="toast('验证码已发送（线框图模拟）','success')">获取验证码</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="form-label">短信验证码<span class="required">*</span></div>
+                <input class="form-input" placeholder="6 位">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">企业邮箱<span class="required">*</span></div>
+                <input class="form-input" placeholder="须为企业域名邮箱（非 @qq.com / @163.com 等公共邮箱）">
+              </div>
+              <div class="form-group">
+                <div class="form-label">备用联系人</div>
+                <input class="form-input" placeholder="姓名 + 手机号（选填）">
+              </div>
+            </div>
+          </div>
+
+          <!-- ⑤ 协议签署 -->
+          <div class="form-section">
+            <div class="form-section-title" style="font-size:15px;display:flex;align-items:center;gap:8px;">
+              <span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:#6366f1;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;">5</span>
+              协议签署
+            </div>
+            <label style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer;">
+              <input type="checkbox" style="margin-top:3px;">
+              <span style="font-size:13px;line-height:1.7;">我已阅读并同意 <a href="javascript:void(0);" style="color:#6366f1;" onclick="toast('打开《千问开放平台入驻协议》全文','info')">《千问开放平台入驻协议》</a></span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer;">
+              <input type="checkbox" style="margin-top:3px;">
+              <span style="font-size:13px;line-height:1.7;">我已阅读并同意 <a href="javascript:void(0);" style="color:#6366f1;" onclick="toast('打开《三方隐私协议承诺》全文','info')">《三方隐私协议承诺》</a></span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer;">
+              <input type="checkbox" style="margin-top:3px;">
+              <span style="font-size:13px;line-height:1.7;">我已阅读并同意 <a href="javascript:void(0);" style="color:#6366f1;" onclick="toast('打开《数据安全与合规承诺书》全文','info')">《数据安全与合规承诺书》</a></span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;">
+              <input type="checkbox" style="margin-top:3px;">
+              <span style="font-size:13px;line-height:1.7;">我承诺以上提交的所有材料真实有效，如有虚假愿承担相应法律责任</span>
+            </label>
+          </div>
+
+          <!-- 底部 CTA -->
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-top:20px;border-top:1px solid #f3f4f6;margin-top:8px;">
+            <div style="font-size:12px;color:#9ca3af;">
+              💾 系统每 30 秒自动保存一次草稿
+            </div>
+            <div style="display:flex;gap:10px;">
+              <button class="btn" onclick="toast('已保存草稿，可随时回来继续填写','success')">保存草稿</button>
+              <button class="btn btn-primary" onclick="confirmThen('确认提交资质审核？\n\n提交后将无法直接修改已提交的材料，如审核被驳回可根据反馈意见重新提交。\n\n平台将在 1-3 个工作日内完成审核，结果会通过短信和邮件通知。',function(){toast('✓ 资质材料已提交，进入平台审核中','success');setTimeout(function(){goPage('account');},1200);});">提交审核 &rarr;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部辅助说明 -->
+        <div style="margin-top:18px;padding:16px;background:#f9fafb;border-radius:8px;font-size:12px;color:#6b7280;line-height:1.8;">
+          <strong style="color:#374151;">📌 常见问题：</strong><br>
+          · <strong>审核需要多久？</strong>平台将在 1-3 个工作日内完成首轮审核，复杂类目（如金融/医疗）可能延长至 5 个工作日。<br>
+          · <strong>审核被驳回怎么办？</strong>驳回原因将通过短信/邮件通知，可在「账号与资质」页查看详细反馈意见，按要求修改后重新提交。<br>
+          · <strong>资质过期如何处理？</strong>营业执照或行业资质到期前 30 天系统会预警，请及时上传新证件，避免影响 Skill 上架与 C 端服务。<br>
+          · <strong>遇到问题联系谁？</strong>可在右上角「帮助」中提交工单，或拨打入驻热线 <strong>400-XXX-XXXX</strong>。
+        </div>
+      </div>
+
+      <!-- ===== PAGE: 账号与资质 ===== -->
+      <div class="page" id="page-account">
+        <div class="wireframe-note">
+          <strong>页面说明（账号与资质）：</strong>展示当前账号的认证状态与企业资质信息。<br>
+          · <strong>未入驻态：</strong>顶部展示入驻引导区（橙色 Hero），引导商家前往提交入驻审核表单。已认证信息区隐藏或收起。<br>
+          · <strong>已入驻态：</strong>引导区隐藏，展示完整的企业信息/资质材料。<br>
+          · 条件渲染逻辑：<code>if (!merchant.certified) showHero; else showDetail;</code>
+        </div>
+
+        <!-- ========= 未入驻态：顶部入驻引导区（条件展示） ========= -->
+        <!-- if (!merchant.certified) { -->
+        <div id="qualSubmitHero" style="background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 50%,#fde68a 100%);border:2px solid #f59e0b;border-radius:12px;padding:28px 32px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:20px;">
+            <div style="flex-shrink:0;width:64px;height:64px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">&#128221;</div>
+            <div style="flex:1;">
+              <div style="font-size:18px;font-weight:600;color:#78350f;margin-bottom:6px;">完成入驻审核，解锁平台全部能力</div>
+              <div style="font-size:13px;color:#92400e;line-height:1.7;">
+                当前账号尚未完成企业资质认证。提交认证后方可创建 Skill、上传知识库及上架服务。<br>
+                审核流程：填写资质材料 → 提交审核 → 平台审核（1-3 工作日）→ 入驻完成
+              </div>
+            </div>
+            <button class="btn btn-primary" style="font-size:14px;padding:10px 24px;white-space:nowrap;" onclick="goPage('qualSubmit')">立即提交入驻审核 &rarr;</button>
+          </div>
+
+          <!-- 简要进度指示 -->
+          <div style="display:flex;align-items:center;gap:12px;margin-top:18px;padding-top:14px;border-top:1px solid rgba(245,158,11,0.3);">
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#92400e;">
+              <span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:#f59e0b;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;">1</span>
+              填写资质材料
+            </div>
+            <div style="flex:1;height:1px;background:rgba(245,158,11,0.3);"></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#d4a574;">
+              <span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:#e5e7eb;color:#9ca3af;font-size:10px;display:flex;align-items:center;justify-content:center;">2</span>
+              提交审核
+            </div>
+            <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#d4a574;">
+              <span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:#e5e7eb;color:#9ca3af;font-size:10px;display:flex;align-items:center;justify-content:center;">3</span>
+              平台审核
+            </div>
+            <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#d4a574;">
+              <span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:#e5e7eb;color:#9ca3af;font-size:10px;display:flex;align-items:center;justify-content:center;">4</span>
+              入驻完成
+            </div>
+          </div>
+        </div>
+        <!-- } -->
+
+        <!-- ========= 已入驻态：账号信息 + 企业信息 + 资质材料 ========= -->
+        <!-- if (merchant.certified) { -->
+
+        <div class="card">
+          <div class="card-title">
+            账号信息
+            <button class="btn btn-sm" onclick="editContact()">编辑联系人</button>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <div class="form-label">登录账号</div>
+              <div style="font-size:14px;padding:8px 0;">138****8888（千问ID）</div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">认证状态</div>
+              <div style="font-size:14px;padding:8px 0;"><span class="tag tag-online">已认证</span></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <div class="form-label">联系人姓名</div>
+              <div style="font-size:14px;padding:8px 0;">李经理</div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">联系人邮箱</div>
+              <div style="font-size:14px;padding:8px 0;">li***@sf-express.com</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">企业主体信息</div>
+          <div class="form-row">
+            <div class="form-group"><div class="form-label">企业全称</div><div style="padding:8px 0;">上海顺丰速运有限公司</div></div>
+            <div class="form-group"><div class="form-label">统一社会信用代码</div><div style="padding:8px 0;">91310000MA1G0K****</div></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><div class="form-label">法定代表人</div><div style="padding:8px 0;">王 **</div></div>
+            <div class="form-group"><div class="form-label">企业类型</div><div style="padding:8px 0;">有限责任公司</div></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><div class="form-label">行业类目</div><div style="padding:8px 0;">物流快递</div></div>
+            <div class="form-group"><div class="form-label">注册地址</div><div style="padding:8px 0;">上海市青浦区***</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">资质材料</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center;">
+              <div style="height:80px;background:#f9fafb;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:11px;margin-bottom:8px;">[营业执照]</div>
+              <div style="font-size:12px;color:#666;">营业执照</div>
+            </div>
+            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center;">
+              <div style="height:80px;background:#f9fafb;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:11px;margin-bottom:8px;">[商标注册证]</div>
+              <div style="font-size:12px;color:#666;">商标注册证</div>
+            </div>
+            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center;">
+              <div style="height:80px;background:#f9fafb;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:11px;margin-bottom:8px;">[快递许可]</div>
+              <div style="font-size:12px;color:#666;">快递业务经营许可</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- } // end if (merchant.certified) -->
+      </div>
+
+      <!-- ===== PAGE: Skill 管理 ===== -->
+      <div class="page" id="page-skills">
+        <div class="wireframe-note">
+          <strong>页面说明（Skill管理）：</strong>Skill管理列表展示当前品牌空间下所有Skill。支持两种创建方式：手动创建（填写基本信息）和导入Skill文件（上传iSkill标准包）。支持进入配置页编辑、提交审核、发布上架。状态流转：草稿→调试中→审核中→已驳回/待上架→已上架→已下线。
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            Skill 列表
+            <div style="display:flex;gap:8px;">
+              <button class="btn" onclick="openModal('importSkill')">&#8593; 导入 Skill 文件</button>
+              <button class="btn btn-primary" onclick="openModal('genSkill')">+ 从知识库创建 Skill</button>
+            </div>
+          </div>
+
+          <!-- Filter -->
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <select class="form-input" style="width:120px;padding:6px 10px;">
+              <option>全部状态</option>
+              <option>草稿</option>
+              <option>调试中</option>
+              <option>审核中</option>
+              <option>已上架</option>
+            </select>
+            <input class="form-input" style="width:200px;padding:6px 10px;" placeholder="搜索Skill名称...">
+          </div>
+
+          <div class="table-wrap">
+            <!-- 操作列「提交审核」逻辑：
+              出现条件 = 材料完整性校验（与调试行为无关）：
+              ① 基本信息已填（名称+slug+能力描述+触发条件）
+              ② Skill 文件存在（至少 SKILL.md）
+              ③ to C 数据已填（品牌 Logo + 关于技能 + 我能为你做）
+              ④ KB 已绑定（从 KB 创建的 Skill）
+              全部满足 → enabled；缺项 → disabled + title tooltip 列出缺失项
+              已上架 / 审核中状态不展示该按钮
+            -->
+            <table>
+              <thead>
+                <tr><th>Skill</th><th>状态</th><th>接入方式</th><th>绑定知识库</th><th>版本</th><th>更新时间</th><th style="width:280px">操作</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <div style="width:32px;height:32px;background:#ff6b35;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600;">SF</div>
+                      <div><div style="font-weight:500;">顺丰寄件</div><div style="font-size:11px;color:#999;">sf-express-shipping</div></div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-online">已上架</span></td>
+                  <td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">沙箱托管</span></td>
+                  <td>顺丰服务政策FAQ</td>
+                  <td>v1.0</td>
+                  <td>2026-06-12</td>
+                  <td>
+                    <button class="btn btn-sm" onclick="openDrawer('skillFiles')">Skill 文件</button>
+                    <button class="btn btn-sm" onclick="openDrawer('skillConfig')">编辑</button>
+                    <button class="btn btn-sm btn-danger" onclick="offlineSkill('顺丰寄件')">下线</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <div style="width:32px;height:32px;background:#ff6b35;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600;">SF</div>
+                      <div><div style="font-weight:500;">顺丰查件</div><div style="font-size:11px;color:#999;">sf-track-package</div></div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-review">审核中</span></td>
+                  <td><span class="tag" style="background:#ede9fe;color:#6d28d9;font-size:10px;">声明式</span></td>
+                  <td>—</td>
+                  <td>v1.0</td>
+                  <td>2026-06-14</td>
+                  <td>
+                    <button class="btn btn-sm" onclick="openDrawer('skillFiles')">Skill 文件</button>
+                    <button class="btn btn-sm" onclick="openDrawer('skillConfig')">查看</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <div style="width:32px;height:32px;background:#ff6b35;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600;">SF</div>
+                      <div><div style="font-weight:500;">顺丰运费估算</div><div style="font-size:11px;color:#999;">sf-price-calc</div></div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-debug">调试中</span></td>
+                  <td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">沙箱托管</span></td>
+                  <td>顺丰运费规则<br><span style="font-size:10px;color:#9ca3af;">+2 个绑定</span></td>
+                  <td>v0.1</td>
+                  <td>2026-06-15</td>
+                  <td>
+                    <button class="btn btn-sm" onclick="openDrawer('skillFiles')">Skill 文件</button>
+                    <button class="btn btn-sm" onclick="openDrawer('skillConfig')">编辑</button>
+                    <button class="btn btn-sm btn-primary" onclick="goPage('skillDebug')">调试</button>
+                    <button class="btn btn-sm" style="background:#059669;color:#fff;border-color:#059669;" onclick="submitReviewCheck()">提交审核</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <div style="width:32px;height:32px;background:#d1d5db;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600;">SF</div>
+                      <div><div style="font-weight:500;">品牌问答Skill</div><div style="font-size:11px;color:#999;">sf-brand-qa</div></div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-draft">草稿</span></td>
+                  <td><span class="tag" style="background:#ede9fe;color:#6d28d9;font-size:10px;">声明式</span></td>
+                  <td>顺丰服务政策FAQ</td>
+                  <td>—</td>
+                  <td>2026-06-15</td>
+                  <td>
+                    <button class="btn btn-sm" onclick="openDrawer('skillFiles')">Skill 文件</button>
+                    <button class="btn btn-sm" onclick="openDrawer('skillConfig')">编辑</button>
+                    <button class="btn btn-sm" disabled title="缺少：to C 数据（品牌 Logo 未上传、「我能为你做」未填写）" style="opacity:0.5;cursor:not-allowed;">提交审核</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PAGE: 知识库管理 ===== -->
+      <div class="page" id="page-kb">
+        <div class="wireframe-note">
+          <strong>页面说明（知识库）：</strong>本期模型——商家拥有唯一一个品牌知识库，所有文档统一存放。页面直接展示文档列表，无需再进入「知识库详情」。<br>
+          <span style="color:#6b7280;">文档级状态机：上传 → 解析 → 机审 → 索引 → <strong style="color:#d97706;">预发布</strong> → 上线 / 下线 / 删除。索引完成默认落「预发布」，需主动点上线才对 C 端可见。</span>
+        </div>
+
+        <!-- 条件 banner：仅当 staged > 0 显示 -->
+        <div id="kbPageBanner" style="margin-bottom:16px;padding:12px 14px;background:linear-gradient(90deg,#fffbeb,#fef3c7);border:1px solid #fcd34d;border-left:4px solid #d97706;border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="font-size:13px;line-height:1.6;color:#92400e;">
+            <strong>你有 3 个文件已索引完成处于「预发布」</strong>，C 端用户尚未可见。建议先在 Skill 调试中验证效果，确认无误后点击「上线」。
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn-sm btn-primary" style="background:#d97706;border-color:#d97706;" onclick="document.getElementById('kbFileFilter').value='staged';filterKbFiles();toast('已筛选预发布文件','info');">筛选预发布</button>
+            <button class="btn btn-sm" onclick="goPage('skillDebug');toast('已切换到 Skill 调试','info');">前往调试 →</button>
+          </div>
+        </div>
+
+        <!-- 4 stat 概览 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+          <div class="card" style="margin:0;padding:14px;"><div style="font-size:12px;color:#6b7280;">总文件数</div><div style="font-size:22px;font-weight:600;margin-top:4px;">12</div><div style="font-size:10px;color:#9ca3af;margin-top:2px;">782 chunks · 14.3 MB</div></div>
+          <div class="card" style="margin:0;padding:14px;"><div style="font-size:12px;color:#6b7280;">处理中</div><div style="font-size:22px;font-weight:600;margin-top:4px;color:#2563eb;">1</div><div style="font-size:10px;color:#9ca3af;margin-top:2px;">解析/机审/索引</div></div>
+          <div class="card" style="margin:0;padding:14px;border:2px solid #fcd34d;background:#fffbeb;cursor:pointer;" onclick="document.getElementById('kbFileFilter').value='staged';filterKbFiles();">
+            <div style="font-size:12px;color:#92400e;">🟠 预发布<span style="font-size:10px;background:#d97706;color:#fff;padding:1px 5px;border-radius:8px;margin-left:4px;">待你决策</span></div>
+            <div style="font-size:22px;font-weight:600;margin-top:4px;color:#d97706;">3</div>
+          </div>
+          <div class="card" style="margin:0;padding:14px;"><div style="font-size:12px;color:#6b7280;">已上线</div><div style="font-size:22px;font-weight:600;margin-top:4px;color:#059669;">7</div><div style="font-size:10px;color:#9ca3af;margin-top:2px;">C 端可召回</div></div>
+        </div>
+
+        <!-- 文件列表操作栏 -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <select class="form-input" id="kbFileFilter" onchange="filterKbFiles()" style="width:160px;height:30px;font-size:12px;">
+                <option value="">全部状态</option>
+                <option value="processing">处理中</option>
+                <option value="rejected">机审驳回</option>
+                <option value="staged">🟠 预发布</option>
+                <option value="online">✅ 已上线</option>
+                <option value="offline">⚪ 已下线</option>
+              </select>
+              <input class="form-input" placeholder="搜索文件名..." style="width:180px;height:30px;font-size:12px;" oninput="filterKbFiles()">
+              <button class="btn btn-sm" id="batchOnlineBtn" onclick="batchOnlineStaged()" style="display:none;background:#d97706;color:#fff;border-color:#d97706;">✅ 一键上线选中 <span id="batchOnlineCnt">0</span> 个</button>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-sm btn-primary" onclick="document.getElementById('kbUploadArea').style.display=document.getElementById('kbUploadArea').style.display==='none'?'block':'none'">+ 上传文件</button>
+              <button class="btn btn-sm" onclick="openModal('genSkill');">从知识库创建 Skill</button>
+            </div>
+          </div>
+
+          <!-- 上传区 -->
+          <div id="kbUploadArea" class="form-upload" style="margin-bottom:16px;display:none;">
+            <div style="font-size:24px;margin-bottom:4px;">📄</div>
+            <div style="font-size:13px;">点击或拖拽文件到此处上传</div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:4px;">Excel / PDF / Word / 图片 / TXT / 超链接 · 单文件 ≤ 20MB · 上传后自动走解析→机审→索引→预发布</div>
+          </div>
+
+          <!-- 文件表 -->
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:32px"><input type="checkbox" id="kbSelAll" onclick="toggleSelAllStaged(this)"></th>
+                  <th>文件名</th>
+                  <th style="width:60px">格式</th>
+                  <th style="width:70px">片段</th>
+                  <th style="width:140px">状态</th>
+                  <th style="width:120px">上传时间</th>
+                  <th style="width:240px">操作</th>
+                </tr>
+              </thead>
+              <tbody id="kbFileTbody">
+                <!-- online -->
+                <tr data-status="online">
+                  <td>—</td>
+                  <td>📊 顺丰服务政策FAQ.xlsx</td>
+                  <td><span class="tag" style="background:#ecfdf5;color:#059669;font-size:10px;">Excel</span></td>
+                  <td>18 条</td>
+                  <td><span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span></td>
+                  <td>2026-06-10</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="previewKbFile('顺丰服务政策FAQ.xlsx')">预览</button>
+                    <button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,'顺丰服务政策FAQ.xlsx')">下线</button>
+                    <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'顺丰服务政策FAQ.xlsx','online')">删除</button>
+                  </td>
+                </tr>
+                <tr data-status="online">
+                  <td>—</td>
+                  <td>📕 寄件收费标准2026.pdf</td>
+                  <td><span class="tag" style="background:#fee2e2;color:#dc2626;font-size:10px;">PDF</span></td>
+                  <td>6 段</td>
+                  <td><span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span></td>
+                  <td>2026-06-10</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="previewKbFile('寄件收费标准2026.pdf')">预览</button>
+                    <button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,'寄件收费标准2026.pdf')">下线</button>
+                    <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'寄件收费标准2026.pdf','online')">删除</button>
+                  </td>
+                </tr>
+                <tr data-status="online">
+                  <td>—</td>
+                  <td>📘 禁寄物品清单.docx</td>
+                  <td><span class="tag" style="background:#dbeafe;color:#1e40af;font-size:10px;">Word</span></td>
+                  <td>4 段</td>
+                  <td><span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span></td>
+                  <td>2026-06-09</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="previewKbFile('禁寄物品清单.docx')">预览</button>
+                    <button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,'禁寄物品清单.docx')">下线</button>
+                    <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'禁寄物品清单.docx','online')">删除</button>
+                  </td>
+                </tr>
+                <tr data-status="online">
+                  <td>—</td>
+                  <td>📊 顺丰运费规则.xlsx</td>
+                  <td><span class="tag" style="background:#ecfdf5;color:#059669;font-size:10px;">Excel</span></td>
+                  <td>15 条</td>
+                  <td><span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span></td>
+                  <td>2026-06-08</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="previewKbFile('顺丰运费规则.xlsx')">预览</button>
+                    <button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,'顺丰运费规则.xlsx')">下线</button>
+                    <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'顺丰运费规则.xlsx','online')">删除</button>
+                  </td>
+                </tr>
+                <tr data-status="online">
+                  <td>—</td>
+                  <td>📕 国际件目的国清单.pdf</td>
+                  <td><span class="tag" style="background:#fee2e2;color:#dc2626;font-size:10px;">PDF</span></td>
+                  <td>24 条</td>
+                  <td><span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span></td>
+                  <td>2026-06-07</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="previewKbFile('国际件目的国清单.pdf')">预览</button>
+                    <button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,'国际件目的国清单.pdf')">下线</button>
+                    <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'国际件目的国清单.pdf','online')">删除</button>
+                  </td>
+                </tr>
+                <tr data-status="online">
+                  <td>—</td>
+                  <td>📕 特殊物品寄送规范.pdf</td>
+                  <td><span class="tag" style="background:#fee2e2;color:#dc2626;font-size:10px;">PDF</span></td>
+                  <td>8 段</td>
+                  <td><span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span></td>
+                  <td>2026-06-05</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="previewKbFile('特殊物品寄送规范.pdf')">预览</button>
+                    <button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,'特殊物品寄送规范.pdf')">下线</button>
+                    <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'特殊物品寄送规范.pdf','online')">删除</button>
+                  </td>
+                </tr>
+                <tr data-status="online">
+                  <td>—</td>
+                  <td>📘 售后服务承诺书.docx</td>
+                  <td><span class="tag" style="background:#dbeafe;color:#1e40af;font-size:10px;">Word</span></td>
+                  <td>6 段</td>
+                  <td><span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span></td>
+                  <td>2026-06-03</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="previewKbFile('售后服务承诺书.docx')">预览</button>
+                    <button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,'售后服务承诺书.docx')">下线</button>
+                    <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'售后服务承诺书.docx','online')">删除</button>
+                  </td>
+                </tr>
+                <!-- staged -->
+                <tr data-status="staged" style="background:#fffbeb;">
+                  <td><input type="checkbox" class="kbStagedCk" onclick="updateBatchOnlineBtn()"></td>
+                  <td>📊 618活动规则.xlsx</td>
+                  <td><span class="tag" style="background:#ecfdf5;color:#059669;font-size:10px;">Excel</span></td>
+                  <td>8 条</td>
+                  <td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">🟠 预发布</span></td>
+                  <td>2026-06-17 14:25</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="goPage('skillDebug');toast('在 Skill 调试中验证该文件','info');">调试预览</button>
+                    <button class="btn btn-sm btn-primary" style="background:#d97706;border-color:#d97706;" onclick="onlineKbDoc(this,'618活动规则.xlsx')">✅ 上线</button>
+                    <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'618活动规则.xlsx','staged')">删除</button>
+                  </td>
+                </tr>
+                <tr data-status="staged" style="background:#fffbeb;">
+                  <td><input type="checkbox" class="kbStagedCk" onclick="updateBatchOnlineBtn()"></td>
+                  <td>🔗 理赔流程说明（超链接）</td>
+                  <td><span class="tag" style="background:#ede9fe;color:#6d28d9;font-size:10px;">Link</span></td>
+                  <td>3 段</td>
+                  <td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">🟠 预发布</span></td>
+                  <td>2026-06-17 11:08</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="goPage('skillDebug');toast('在 Skill 调试中验证该文件','info');">调试预览</button>
+                    <button class="btn btn-sm btn-primary" style="background:#d97706;border-color:#d97706;" onclick="onlineKbDoc(this,'理赔流程说明')">✅ 上线</button>
+                    <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'理赔流程说明','staged')">删除</button>
+                  </td>
+                </tr>
+                <tr data-status="staged" style="background:#fffbeb;">
+                  <td><input type="checkbox" class="kbStagedCk" onclick="updateBatchOnlineBtn()"></td>
+                  <td>📕 2026会员权益手册.pdf</td>
+                  <td><span class="tag" style="background:#fee2e2;color:#dc2626;font-size:10px;">PDF</span></td>
+                  <td>11 条</td>
+                  <td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">🟠 预发布</span></td>
+                  <td>2026-06-16 09:42</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="goPage('skillDebug');toast('在 Skill 调试中验证该文件','info');">调试预览</button>
+                    <button class="btn btn-sm btn-primary" style="background:#d97706;border-color:#d97706;" onclick="onlineKbDoc(this,'2026会员权益手册.pdf')">✅ 上线</button>
+                    <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'2026会员权益手册.pdf','staged')">删除</button>
+                  </td>
+                </tr>
+                <!-- processing -->
+                <tr data-status="processing">
+                  <td>—</td>
+                  <td>📕 国际件清关须知.pdf <span style="font-size:10px;color:#2563eb;">[索引中 73%]</span></td>
+                  <td><span class="tag" style="background:#fee2e2;color:#dc2626;font-size:10px;">PDF</span></td>
+                  <td>—</td>
+                  <td><span class="tag" style="background:#dbeafe;color:#1e40af;font-size:10px;">⏳ 索引中</span></td>
+                  <td>2026-06-17 14:30</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="confirmThen('确认取消上传？已上传内容将被清除。',function(){removeRow(this,'国际件清关须知.pdf');}.bind(this));">取消上传</button>
+                  </td>
+                </tr>
+                <!-- rejected -->
+                <tr data-status="rejected" style="background:#fef2f2;">
+                  <td>—</td>
+                  <td>📊 内部价格表.xlsx <span style="font-size:10px;color:#dc2626;">[机审驳回]</span></td>
+                  <td><span class="tag" style="background:#ecfdf5;color:#059669;font-size:10px;">Excel</span></td>
+                  <td>—</td>
+                  <td><span class="tag" style="background:#fee2e2;color:#dc2626;font-size:10px;">❌ 机审驳回</span></td>
+                  <td>2026-06-17 10:15</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="alert('驳回原因：检测到内部成本数据（敏感信息），请脱敏后重新上传。\n\n建议：移除采购价 / 利润率字段后重传。')">查看原因</button>
+                    <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'内部价格表.xlsx','rejected')">删除</button>
+                  </td>
+                </tr>
+                <!-- offline -->
+                <tr data-status="offline" style="opacity:0.7;">
+                  <td>—</td>
+                  <td>📊 双11活动规则.xlsx</td>
+                  <td><span class="tag" style="background:#ecfdf5;color:#059669;font-size:10px;">Excel</span></td>
+                  <td>5 条</td>
+                  <td><span class="tag" style="background:#f3f4f6;color:#6b7280;font-size:10px;">⚪ 已下线</span></td>
+                  <td>2025-11-08</td>
+                  <td>
+                    <button class="btn btn-sm btn-ghost" onclick="previewKbFile('双11活动规则.xlsx')">预览</button>
+                    <button class="btn btn-sm btn-primary" onclick="reonlineKbDoc(this,'双11活动规则.xlsx')">重新上线</button>
+                    <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'双11活动规则.xlsx','offline')">删除</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;font-size:12px;color:#6b7280;">
+            <span>共 12 个文件 · 已上线 7 · 预发布 3 · 处理中 1 · 驳回 1 · 已下线 1</span>
+            <span style="font-size:11px;color:#9ca3af;">替换内容路径：下线 → 删除 → 重新上传</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PAGE: 召回测试 ===== -->
+      <div class="page" id="page-recallTest">
+        <div class="wireframe-note">
+          <strong>页面说明（召回测试）：</strong>纯诊断工具，输入 query 验证 KB 向量召回效果。不影响任何文件的线上状态。<br>
+          <span style="color:#6b7280;">默认召回范围 = staged + online + offline（全量已索引），可切换为「仅模拟 C 端」收紧到 online only。</span>
+        </div>
+
+        <!-- 范围提示 -->
+        <div style="margin-bottom:16px;padding:12px 14px;background:linear-gradient(90deg,#eff6ff,#fef3c7);border:1px solid #fcd34d;border-radius:8px;font-size:12px;line-height:1.7;color:#374151;">
+          <strong>🔍 召回范围：</strong>
+          <span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线 7</span>
+          <span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">🟠 预发布 3</span>
+          <span class="tag" style="background:#f3f4f6;color:#6b7280;font-size:10px;">⚪ 已下线 1</span>
+          <strong>（全量已索引 · 782 chunks）</strong>
+          <span style="color:#6b7280;margin-left:6px;">· 仅 ✅ 已上线 在 C 端真实召回</span>
+          <label style="float:right;font-size:11px;cursor:pointer;color:#2563eb;">
+            <input type="checkbox" id="recallSimC" onchange="toggleRecallSimC(this)" style="vertical-align:middle;"> 仅模拟 C 端（仅已上线）
+          </label>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px;">
+            输入测试 Query
+          </div>
+
+          <!-- 输入 -->
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <input class="form-input" id="recallInput" placeholder="输入用户可能会问的问题，如：618 寄快递有折扣吗" style="flex:1;">
+            <button class="btn btn-primary" onclick="runRecallTest()">测试召回</button>
+          </div>
+
+          <!-- 结果 -->
+          <div id="recallResult" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+            <div style="background:#fafbfc;padding:10px 14px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:12px;font-weight:500;">召回结果（Top 3）</span>
+              <span style="font-size:11px;color:#6b7280;">查询：「618 寄快递有折扣吗」</span>
+            </div>
+            <div style="padding:14px;">
+              <!-- Top1 staged -->
+              <div style="border:1px solid #fcd34d;border-radius:6px;padding:12px;margin-bottom:10px;background:#fffbeb;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:12px;font-weight:600;color:#d97706;">Top 1 · 相似度 0.94</span>
+                  <span style="font-size:11px;color:#6b7280;">来源：618活动规则.xlsx · 第3条 <span class="tag" style="background:#fef3c7;color:#92400e;font-size:9px;padding:1px 4px;">🟠 预发布</span></span>
+                </div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Q: 618 期间寄快递有什么优惠？</div>
+                <div style="font-size:12px;color:#374151;line-height:1.6;">A: 618 期间标快 8 折，同城次日达 6 折优惠。活动时间 6 月 1 日 - 6 月 20 日，下单时自动减免，不可与其他优惠叠加。</div>
+                <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #fcd34d;font-size:11px;color:#92400e;">⚠ 该 chunk 来自预发布文件，C 端用户看不到。如需生效请前往「知识库管理」点击对应文件的「上线」。</div>
+              </div>
+              <!-- Top2 online -->
+              <div style="border:1px solid #d1fae5;border-radius:6px;padding:12px;margin-bottom:10px;background:#f0fdf4;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:12px;font-weight:600;color:#059669;">Top 2 · 相似度 0.72</span>
+                  <span style="font-size:11px;color:#6b7280;">来源：寄件收费标准2026.pdf · 第1段 <span class="tag" style="background:#dcfce7;color:#166534;font-size:9px;padding:1px 4px;">✅ 已上线</span></span>
+                </div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:4px;">A: 标准快递首重 12 元/kg，续重 6 元/kg。特快首重 22 元/kg…</div>
+              </div>
+              <!-- Top3 offline -->
+              <div style="border:1px solid #e5e7eb;border-radius:6px;padding:12px;background:#f9fafb;opacity:0.85;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:12px;font-weight:600;color:#6b7280;">Top 3 · 相似度 0.58</span>
+                  <span style="font-size:11px;color:#6b7280;">来源：双11活动规则.xlsx · 第2条 <span class="tag" style="background:#f3f4f6;color:#6b7280;font-size:9px;padding:1px 4px;">⚪ 已下线</span></span>
+                </div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:4px;color:#6b7280;">A: 双 11 期间标快 7 折，同城 5 折…（已过期）</div>
+                <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #d1d5db;font-size:11px;color:#6b7280;">⚠ 该 chunk 来自已下线文件，C 端用户不会看到。</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;padding:10px 14px;background:#f9fafb;border-radius:6px;font-size:11px;color:#6b7280;line-height:1.6;">
+            ℹ️ 召回测试为纯诊断工具，结果不影响线上状态。如对预发布内容效果满意，请前往<a href="javascript:goPage('kb');" style="color:#2563eb;">知识库管理</a>点击对应文件的「✅ 上线」按钮。
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PAGE: Skill 调试 ===== -->
+      <div class="page" id="page-skillDebug">
+        <div class="wireframe-note">
+          <strong>页面说明（Skill 调试）：</strong>针对单个 Skill 进行能力验证——左侧 Skill 文件资源管理器（说明/文件/版本 Tab + SKILL.md 查看），右侧预览对话（工具调用详情 + KB 召回三色 chunk + 最终回答）。调试工具为商家自助服务，调试记录将在提交审核时供审核员参考。
+        </div>
+
+        <!-- Skill 选择栏 -->
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+          <span style="font-size:13px;color:#6b7280;">调试目标：</span>
+          <select class="form-input" style="width:240px;padding:6px 10px;">
+            <option>essay-writing-skill-v3 · 高中议论文写作 Skill</option>
+            <option>顺丰运费估算 (草稿)</option>
+            <option>顺丰寄件 (已上架)</option>
+            <option>顺丰查件 (已上架)</option>
+          </select>
+          <span style="margin-left:auto;font-size:11px;color:#9ca3af;">编辑 Skill 文件后保存为新版草稿，需重新提交审核</span>
+        </div>
+
+        <!-- IDE 双栏：左 Skill 文件资源 / 右 预览对话 -->
+        <div style="display:grid;grid-template-columns:1fr 480px;gap:12px;height:580px;">
+
+          <!-- ===== 左侧：Skill 文件查看器 ===== -->
+          <div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;background:#fff;">
+            <!-- 顶部品牌横条 -->
+            <div style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:10px;">
+              <div style="width:28px;height:28px;background:#6366f1;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600;">E</div>
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:600;color:#111827;">essay-writing-skill-v3</div>
+                <div style="font-size:11px;color:#6b7280;line-height:1.5;">高中议论文写作 Skill，覆盖材料作文、引语作文、命题作文、话题作文、任务驱动作文等高中标准议论文（含高考）的从零创作、局部修改、评估反馈与单点诊断。</div>
+              </div>
+            </div>
+
+            <!-- 三 Tab 切换：说明 / 文件 / 版本 -->
+            <div style="display:flex;border-bottom:1px solid #e5e7eb;background:#fff;">
+              <div onclick="switchSfTab(this,'desc')" style="padding:8px 16px;font-size:12px;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;">&#128221; 说明</div>
+              <div onclick="switchSfTab(this,'files')" class="sf-tab-active" style="padding:8px 16px;font-size:12px;color:#2563eb;cursor:pointer;border-bottom:2px solid #2563eb;font-weight:500;">&#128193; 文件</div>
+              <div onclick="switchSfTab(this,'ver')" style="padding:8px 16px;font-size:12px;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;">&#128221; 版本</div>
+            </div>
+
+            <!-- 文件浏览器 + 代码编辑区 -->
+            <div style="flex:1;display:grid;grid-template-columns:200px 1fr;overflow:hidden;">
+              <!-- 文件树 -->
+              <div style="border-right:1px solid #e5e7eb;background:#fafbfc;overflow-y:auto;">
+                <div style="padding:8px 12px;font-size:11px;font-weight:500;color:#6b7280;display:flex;align-items:center;justify-content:space-between;">
+                  <span>文件资源管理器</span>
+                  <span style="color:#9ca3af;cursor:pointer;">&#128313;</span>
+                </div>
+                <div style="padding:4px 0;">
+                  <div style="padding:4px 10px;font-size:12px;color:#374151;cursor:pointer;display:flex;align-items:center;gap:4px;">
+                    <span style="color:#6b7280;">&#9662;</span> <span>references</span>
+                  </div>
+                  <div onclick="selectDbgFile(this,'SKILL.md')" id="dbg-file-skillmd" class="dbg-file-active" style="padding:4px 28px;font-size:12px;color:#1e40af;cursor:pointer;background:#eff6ff;display:flex;align-items:center;gap:4px;">
+                    <span>&#128196;</span> <span>SKILL.md</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 代码区 -->
+              <div style="display:flex;flex-direction:column;overflow:hidden;background:#1e1e2d;color:#e5e7eb;">
+                <div style="padding:6px 12px;background:#0f172a;border-bottom:1px solid #1e293b;display:flex;align-items:center;gap:8px;font-size:11px;color:#94a3b8;">
+                  <span>SKILL.md</span>
+                  <span style="margin-left:auto;font-size:10px;color:#64748b;">编码: UTF-8 · 空格 2 · vs-light</span>
+                </div>
+                <div style="flex:1;overflow:auto;font-family:Menlo,Consolas,monospace;font-size:11px;line-height:1.6;padding:8px 0;">
+<span style="display:flex;"><span style="display:inline-block;width:36px;text-align:right;padding-right:10px;color:#64748b;">1</span><span style="color:#94a3b8;">---</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:36px;text-align:right;padding-right:10px;color:#64748b;">2</span><span><span style="color:#f472b6;">name</span>: essay-writing-skill-v3</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:36px;text-align:right;padding-right:10px;color:#64748b;">3</span><span><span style="color:#f472b6;">description</span>: 高中议论文写作 Skill。</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:36px;text-align:right;padding-right:10px;color:#64748b;">4</span><span><span style="color:#f472b6;">scenarios</span>: 用户要写议论文、对文章给反馈、或与立意素材相关修改。</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:36px;text-align:right;padding-right:10px;color:#64748b;">5</span><span style="color:#94a3b8;">---</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:36px;text-align:right;padding-right:10px;color:#64748b;">6</span><span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:36px;text-align:right;padding-right:10px;color:#64748b;">7</span><span style="color:#fbbf24;"># 高中议论文写作 Skill</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:36px;text-align:right;padding-right:10px;color:#64748b;">8</span><span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:36px;text-align:right;padding-right:10px;color:#64748b;">9</span><span>你是高中议论文写作老师，覆盖从审题到成文全流程……</span></span>
+                </div>
+                <div style="padding:6px 12px;background:#0f172a;border-top:1px solid #1e293b;font-size:10px;color:#64748b;">
+                  行: 154 · 字: 4763 · 语言: markdown
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== 右侧：预览与调试对话 ===== -->
+          <div style="border:1px solid #e5e7eb;border-radius:8px;display:flex;flex-direction:column;overflow:hidden;background:#fff;">
+            <!-- 头部 -->
+            <div style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:13px;font-weight:500;">预览与调试</span>
+                <span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">实时</span>
+              </div>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm btn-ghost" title="清空对话" onclick="clearDebugChat()">&#128465;</button>
+                <button class="btn btn-sm btn-ghost" title="导出会话日志" onclick="exportDebugChat()">&#128190;</button>
+              </div>
+            </div>
+
+            <!-- KB 召回范围 banner -->
+            <div style="padding:10px 14px;background:linear-gradient(90deg,#eff6ff,#fef3c7);border-bottom:1px solid #fcd34d;font-size:11px;color:#374151;line-height:1.6;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+                <span>
+                  <strong>🔍 KB 召回范围：</strong>
+                  <span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线 7</span>
+                  <span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">🟠 预发布 3</span>
+                  <span class="tag" style="background:#f3f4f6;color:#6b7280;font-size:10px;">⚪ 已下线 2</span>
+                  <span style="color:#6b7280;">（全量已索引）</span>
+                </span>
+                <label style="font-size:11px;cursor:pointer;color:#2563eb;display:flex;align-items:center;gap:4px;">
+                  <input type="checkbox" id="dbgSimC" onchange="toggleDbgSimC(this)"> 仅模拟 C 端（仅已上线）
+                </label>
+              </div>
+              <div style="margin-top:4px;font-size:10px;color:#92400e;">⚠ 调试时召回的预发布/已下线 chunk，C 端用户实际看不到</div>
+            </div>
+
+            <!-- 对话区 -->
+            <div id="dbgChatBubbles" style="flex:1;padding:16px;overflow-y:auto;background:#fafbfc;">
+              <div style="display:flex;gap:8px;margin-bottom:12px;">
+                <div style="width:28px;height:28px;background:#dbeafe;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;">&#128075;</div>
+                <div>
+                  <div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">Hi</div>
+                  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0 10px 10px 10px;padding:10px 14px;font-size:13px;color:#374151;line-height:1.6;max-width:340px;">
+                    你好，请在下方输入问题开始调试。
+                  </div>
+                </div>
+              </div>
+
+              <!-- 演示：用户提问 -->
+              <div style="display:flex;gap:8px;margin-bottom:12px;justify-content:flex-end;">
+                <div style="background:#2563eb;color:#fff;border-radius:10px 0 10px 10px;padding:10px 14px;font-size:13px;line-height:1.6;max-width:340px;">
+                  618 寄快递有什么折扣？
+                </div>
+                <div style="width:28px;height:28px;background:#dbeafe;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">🧑</div>
+              </div>
+
+              <!-- 演示：bot 回复（含三色 chunk） -->
+              <div style="display:flex;gap:8px;margin-bottom:12px;">
+                <div style="width:28px;height:28px;background:#fef3c7;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">🤖</div>
+                <div style="flex:1;max-width:480px;">
+                  <details style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 12px;font-size:11px;margin-bottom:6px;">
+                    <summary style="cursor:pointer;color:#6b7280;">🔧 工具调用：kb_search_tool · 0.32s</summary>
+                    <div style="font-family:Menlo,Consolas,monospace;font-size:10px;color:#374151;margin-top:6px;background:#fff;padding:8px;border-radius:4px;line-height:1.5;">
+                      <div style="color:#7c3aed;">// 入参</div>
+                      { "query": "618 寄快递折扣", "top_k": 3 }
+                    </div>
+                  </details>
+                  <details open style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 12px;font-size:11px;margin-bottom:6px;">
+                    <summary style="cursor:pointer;color:#6b7280;">📚 KB 召回 Top3</summary>
+                    <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">
+                      <div style="border-left:3px solid #d97706;background:#fffbeb;padding:6px 10px;border-radius:0 4px 4px 0;font-size:11px;">
+                        <span class="tag" style="background:#fef3c7;color:#92400e;font-size:9px;padding:1px 4px;">🟠 预发布</span>
+                        <span style="color:#92400e;">618活动规则.xlsx · 第3条 · 0.94</span>
+                        <div style="color:#374151;margin-top:2px;">「618 期间标快 8 折，同城次日达 6 折…」</div>
+                      </div>
+                      <div style="border-left:3px solid #059669;background:#f0fdf4;padding:6px 10px;border-radius:0 4px 4px 0;font-size:11px;">
+                        <span class="tag" style="background:#dcfce7;color:#166534;font-size:9px;padding:1px 4px;">✅ 已上线</span>
+                        <span style="color:#166534;">寄件收费标准2026.pdf · 第1段 · 0.72</span>
+                        <div style="color:#374151;margin-top:2px;">「标准快递首重 12 元/kg，续重 6 元/kg…」</div>
+                      </div>
+                      <div style="border-left:3px solid #9ca3af;background:#f9fafb;padding:6px 10px;border-radius:0 4px 4px 0;font-size:11px;opacity:0.85;">
+                        <span class="tag" style="background:#f3f4f6;color:#6b7280;font-size:9px;padding:1px 4px;">⚪ 已下线</span>
+                        <span style="color:#6b7280;">双11活动规则.xlsx · 第2条 · 0.58</span>
+                        <div style="color:#6b7280;margin-top:2px;">「双 11 期间标快 7 折…（已过期）」</div>
+                      </div>
+                    </div>
+                  </details>
+                  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0 10px 10px 10px;padding:10px 14px;font-size:13px;color:#374151;line-height:1.6;">
+                    618 期间寄快递有以下优惠：标准快递 8 折，同城次日达 6 折，活动时间 6 月 1 日 - 6 月 20 日。
+                    <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #fcd34d;font-size:11px;color:#92400e;">
+                      ⚠ Top1 命中 <strong>预发布</strong>chunk，C 端用户实际看不到。如需生效请前往 KB 详情点击「上线」。
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 输入框 -->
+            <div style="padding:10px 12px;border-top:1px solid #e5e7eb;background:#fff;">
+              <div style="display:flex;gap:6px;align-items:center;background:#f3f4f6;border-radius:20px;padding:6px 12px;">
+                <input id="dbgChatInput" class="form-input" placeholder="输入你的问题..." style="flex:1;border:none;background:transparent;height:28px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')sendDebugMessage();">
+                <button class="btn btn-sm" style="border-radius:50%;width:28px;height:28px;padding:0;background:#2563eb;color:#fff;" onclick="sendDebugMessage()">&#10148;</button>
+              </div>
+              <div style="margin-top:6px;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#9ca3af;">
+                <span>调试期间不计入 C 端流量；工具调用 / KB 召回过程会以折叠卡片展示</span>
+                <a href="javascript:void(0);" style="color:#2563eb;" onclick="toast('已展开调用追踪面板：tool_schema 入参 / 出参 / KB 召回 chunk / token 数', 'info')">查看调用追踪 &gt;</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 推荐流程引导 -->
+        <div style="margin-top:14px;padding:12px 14px;background:#eff6ff;border-radius:8px;border-left:3px solid #2563eb;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <span style="font-size:14px;">💡</span>
+            <span style="font-size:12px;color:#1e40af;line-height:1.5;"><strong>推荐流程：</strong>Skill 调试验证后，进入端到端调试在真机走一遍完整链路。完成调试的 Skill 更大概率通过审核。</span>
+          </div>
+          <button class="btn btn-sm" onclick="goPage('e2eDebug')" style="white-space:nowrap;">端到端调试 &rarr;</button>
+        </div>
+
+        <!-- Skill 调试历史 -->
+        <div class="card" style="margin-top:18px;">
+          <div class="card-title">调试历史（单 Skill）</div>
+          <table>
+            <thead><tr><th>时间</th><th>Skill</th><th>测试 Query</th><th>KB 命中</th><th>结果</th></tr></thead>
+            <tbody>
+              <tr><td>2026-06-16 11:30</td><td>顺丰运费估算</td><td>从北京寄5公斤到上海多少钱</td><td>寄件收费标准 · 0.92</td><td><span class="tag tag-online">通过</span></td></tr>
+              <tr><td>2026-06-16 11:25</td><td>顺丰运费估算</td><td>寄一台电脑到深圳</td><td>大件物流规则 · 0.87</td><td><span class="tag tag-online">通过</span></td></tr>
+              <tr><td>2026-06-16 11:20</td><td>顺丰运费估算</td><td>国际件怎么收费</td><td>未命中</td><td><span class="tag tag-rejected">失败</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== PAGE: 端到端调试 ===== -->
+      <div class="page" id="page-e2eDebug">
+        <div class="wireframe-note">
+          <strong>页面说明（端到端调试）：</strong>覆盖完整 C 端链路（Skill 路由 → 工具调用 → KB 召回 → 大模型生成 → 详情页渲染）。流程：添加测试 UID 白名单 → 扫码进入预发包 → 真机对话验证。推荐在 Skill 调试后使用，但不强制。调试记录将作为审核参考信号。
+        </div>
+
+        <!-- 推荐流程 banner -->
+        <div style="background:linear-gradient(90deg,#eff6ff,#f0fdf4);border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:14px;">🔗</span>
+            <span style="font-size:12px;color:#1e40af;line-height:1.5;"><strong>推荐流程：</strong>先在「Skill 调试」中验证逻辑正确性，再到本页真机走完整链路。充分调试可提高审核通过率。</span>
+          </div>
+          <button class="btn btn-sm" onclick="goPage('skillDebug')">&#8592; 返回 Skill 调试</button>
+        </div>
+
+        <!-- 端到端说明 -->
+        <div style="background:#fef3c7;border-left:3px solid #d97706;padding:12px 14px;border-radius:6px;font-size:12px;color:#92400e;line-height:1.7;margin-bottom:16px;">
+          <strong>⚠ 端到端调试说明：</strong>覆盖完整 C 端链路（Skill 路由 → 工具调用 → KB 召回 → 大模型生成 → 详情页渲染）。流程：① 在下方输入需要加白的测试 UID；② 平台将 UID 加入预发白名单；③ 用对应账号扫描右侧二维码进入预发包；④ 在真实千问 App 内对话验证 Skill 唤起与回答效果。<br>
+          <strong style="color:#dc2626;">KB 召回范围 = 全量已索引（含 🟠 预发布 / ⚪ 已下线）</strong>，目的是"上线前在真机走一遍流程"。文件需点击「上线」后才对真实 C 端用户可见。
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 360px;gap:16px;">
+
+          <!-- 左：UID 加白名单管理 -->
+          <div class="card" style="margin:0;">
+            <div class="card-title">
+              测试 UID 白名单管理
+              <span style="font-size:11px;color:#9ca3af;font-weight:400;margin-left:auto;">已加白 <strong style="color:#059669;">3</strong> / 上限 50</span>
+            </div>
+
+            <!-- 批量输入 -->
+            <div style="margin-bottom:14px;">
+              <div style="font-size:12px;color:#374151;margin-bottom:6px;font-weight:500;">批量录入测试 UID</div>
+              <textarea class="form-textarea" id="e2e-uid-input" placeholder="一行一个 UID，支持批量粘贴。例如：&#10;2088xxxxxxxxxxxx1&#10;2088xxxxxxxxxxxx2&#10;tb_user_zhangsan" style="min-height:90px;font-family:Menlo,Consolas,monospace;font-size:12px;"></textarea>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+                <div style="font-size:11px;color:#9ca3af;">支持淘宝 / 支付宝 / 千问账号 UID。每个商家最多加白 50 个测试账号</div>
+                <button class="btn btn-primary btn-sm" onclick="addE2EWhitelist()">&#9989; 提交加白</button>
+              </div>
+            </div>
+
+            <!-- 已加白列表 -->
+            <div style="border-top:1px solid #f3f4f6;padding-top:14px;">
+              <div style="font-size:12px;color:#374151;margin-bottom:8px;font-weight:500;">当前已加白 UID</div>
+              <table style="font-size:12px;">
+                <thead>
+                  <tr><th>UID</th><th>账号类型</th><th>加白时间</th><th>最近调试</th><th>状态</th><th>操作</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-family:Menlo,monospace;">2088xxxxxxxx5821</td>
+                    <td><span class="tag" style="background:#dbeafe;color:#1e40af;font-size:10px;">支付宝</span></td>
+                    <td>2026-06-16 10:24</td>
+                    <td>2026-06-16 14:08</td>
+                    <td><span class="tag tag-online">已生效</span></td>
+                    <td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="removeRow(this,'2088xxxxxxxx5821')">移除</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-family:Menlo,monospace;">tb_user_zhangsan</td>
+                    <td><span class="tag" style="background:#fff7ed;color:#c2410c;font-size:10px;">淘宝</span></td>
+                    <td>2026-06-16 10:24</td>
+                    <td>2026-06-16 13:52</td>
+                    <td><span class="tag tag-online">已生效</span></td>
+                    <td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="removeRow(this,'tb_user_zhangsan')">移除</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-family:Menlo,monospace;">qw_uid_8821007</td>
+                    <td><span class="tag" style="background:#ede9fe;color:#6d28d9;font-size:10px;">千问</span></td>
+                    <td>2026-06-16 10:25</td>
+                    <td>—</td>
+                    <td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">同步中</span></td>
+                    <td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="removeRow(this,'qw_uid_8821007')">移除</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 右：预发包二维码 -->
+          <div class="card" style="margin:0;text-align:center;">
+            <div class="card-title" style="justify-content:center;">预发包扫码入口</div>
+            <div style="margin:6px 0 14px;font-size:12px;color:#6b7280;line-height:1.7;">
+              使用<strong>已加白</strong>的账号在手机上登录千问 App<br>扫描下方二维码进入预发环境
+            </div>
+
+            <!-- 二维码 -->
+            <div style="display:inline-block;padding:14px;background:#fff;border:2px solid #111827;border-radius:8px;margin-bottom:10px;">
+              <div style="width:200px;height:200px;background-image:linear-gradient(45deg,#000 25%,transparent 25%),linear-gradient(-45deg,#000 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#000 75%),linear-gradient(-45deg,transparent 75%,#000 75%);background-size:14px 14px;background-position:0 0,0 7px,7px -7px,-7px 0;position:relative;">
+                <div style="position:absolute;top:0;left:0;width:46px;height:46px;background:#fff;border:8px solid #111827;"></div>
+                <div style="position:absolute;top:0;right:0;width:46px;height:46px;background:#fff;border:8px solid #111827;"></div>
+                <div style="position:absolute;bottom:0;left:0;width:46px;height:46px;background:#fff;border:8px solid #111827;"></div>
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;background:#6366f1;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:600;">Q</div>
+              </div>
+            </div>
+
+            <div style="font-size:11px;color:#9ca3af;margin-bottom:10px;">
+              二维码有效期 <strong style="color:#dc2626;">24 小时</strong> · 剩余 <strong>23h 47m</strong>
+            </div>
+
+            <div style="display:flex;gap:6px;justify-content:center;margin-bottom:12px;">
+              <button class="btn btn-sm" onclick="toast('✓ 已刷新二维码，新有效期 24 小时','success')">&#8635; 刷新</button>
+              <button class="btn btn-sm" onclick="toast('已下载二维码图片到本地','success')">&#11015; 下载</button>
+              <button class="btn btn-sm" onclick="toast('链接已复制：pre.qwen.com/skill-debug/sf-shipping?token=…','success')">&#128279; 复制链接</button>
+            </div>
+
+            <div style="background:#eff6ff;border-radius:6px;padding:10px 12px;font-size:11px;color:#1e40af;line-height:1.6;text-align:left;">
+              <strong>&#9432; 扫码后建议测试场景：</strong><br>
+              · 主流程 query：覆盖触发词命中、工具调用<br>
+              · 异常场景：参数缺失、超出业务边界<br>
+              · 详情页跳转：点击 C 端「我能为你做」能力点
+            </div>
+          </div>
+        </div>
+
+        <!-- 提交审核引导 -->
+        <div style="margin-top:16px;padding:12px 14px;background:#f0fdf4;border-radius:8px;border-left:3px solid #059669;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <span style="font-size:14px;">✅</span>
+            <span style="font-size:12px;color:#166534;line-height:1.5;">调试完毕后即可提交审核。平台会记录你的调试活动作为审核参考——充分调试有助于提高通过率。</span>
+          </div>
+          <button class="btn btn-primary" onclick="submitReviewCheck()">&#10003; 提交审核 &rarr;</button>
+        </div>
+
+        <!-- 端到端调试历史 -->
+        <div class="card" style="margin-top:18px;">
+          <div class="card-title">调试历史（端到端）</div>
+          <table>
+            <thead><tr><th>时间</th><th>UID</th><th>测试 Query</th><th>结果</th><th>响应时长</th></tr></thead>
+            <tbody>
+              <tr><td>2026-06-16 14:08</td><td>2088...5821</td><td>从北京寄5公斤到上海多少钱</td><td><span class="tag tag-online">通过</span></td><td>1.6s</td></tr>
+              <tr><td>2026-06-16 13:52</td><td>tb_user_zhangsan</td><td>顺丰特快和标快哪个划算</td><td><span class="tag tag-online">通过</span></td><td>2.1s</td></tr>
+              <tr><td>2026-06-16 13:48</td><td>2088...5821</td><td>国际件怎么寄到日本</td><td><span class="tag tag-online">通过</span></td><td>1.9s</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div>
+
+<!-- ===== DRAWER: Skill 配置页 ===== -->
+<div class="drawer-overlay" id="drawer-skillConfig">
+  <div class="drawer">
+    <div class="drawer-header">
+      <h3>Skill 配置 — 顺丰运费估算</h3>
+      <button class="drawer-close" onclick="closeDrawer('skillConfig')">&times;</button>
+    </div>
+    <div class="drawer-body">
+      <!-- 顶部说明 banner：本表单只配置元数据，能力相关请去 Skill 文件 -->
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:12px;color:#1e3a8a;line-height:1.7;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:14px;">&#9432;</span>
+          <strong>本表单仅配置 Skill 元数据</strong>
+        </div>
+        <div style="padding-left:22px;color:#1e40af;">
+          能力描述 / 触发条件 / 权限 / tool_schema / 关联知识库 等能力相关内容请通过
+          <a href="javascript:void(0);" onclick="closeDrawer('skillConfig');openDrawer('skillFiles');" style="color:#2563eb;font-weight:500;">Skill 文件 &gt;</a>
+          查看与编辑。
+        </div>
+      </div>
+
+      <!-- 基本信息 -->
+      <div class="form-section">
+        <div class="form-section-title">基本信息</div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">Skill 名称<span class="required">*</span></div>
+            <input class="form-input" value="顺丰运费估算">
+            <div class="form-hint">展示在 C 端的中文名</div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Slug（唯一标识）<span class="required">*</span></div>
+            <div style="display:flex;align-items:stretch;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;background:#fff;">
+              <span style="background:#f3f4f6;color:#6b7280;padding:7px 10px;font-size:12px;font-family:'Monaco','Consolas',monospace;border-right:1px solid #d1d5db;display:flex;align-items:center;">shunfeng_</span>
+              <input class="form-input" style="border:none;border-radius:0;flex:1;font-family:'Monaco','Consolas',monospace;font-size:12px;" value="price_calc">
+            </div>
+            <div class="form-hint">前缀由平台基于品牌主体生成，不可修改</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">图标</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:48px;height:48px;background:#ff6b35;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:600;">SF</div>
+              <button class="btn btn-sm" onclick="changeSkillIcon()">&#9998; 更换图标</button>
+              <span style="font-size:11px;color:#9ca3af;">建议 PNG/JPG · 1:1 · ≤ 200KB</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">一句话概述<span class="required">*</span></div>
+            <input class="form-input" value="快速估算顺丰各服务产品的运费">
+            <div class="form-hint">C 端列表页副标题，建议 12-30 字</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 关联知识库（仅"从知识库创建"的 Skill 展示，导入创建的 Skill 不展示此区块） -->
+      <!-- 条件渲染逻辑：if (skill.source === 'from_kb') show; else hide -->
+      <div class="form-section" id="skillConfigKbSection">
+        <div class="form-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>关联知识库 <span style="font-weight:400;color:#9ca3af;font-size:11px;">（只读）</span></span>
+          <a href="javascript:void(0);" onclick="openDrawer('skillFiles');closeDrawer('skillConfig');" style="font-size:12px;color:#2563eb;font-weight:400;">前往 Skill 详情页修改 &gt;</a>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#fafbfc;">
+          <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📚</div>
+          <div style="flex:1;font-size:13px;">
+            <div style="font-weight:500;">顺丰品牌知识库</div>
+            <div style="font-size:11px;color:#6b7280;margin-top:2px;">已上线 7 文件 · 预发布 3 文件 · <span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">来源 KB · 创建时自动绑定</span></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:8px;line-height:1.6;">
+          ℹ️ 如需修改绑定关系（解绑/重新绑定），请前往 Skill 详情页操作。本表单仅展示当前绑定状态。
+        </div>
+      </div>
+
+      <!-- to C 数据配置 -->
+      <div class="form-section">
+        <div class="form-section-title">to C 数据配置（C 端详情页展示）</div>
+        <div class="form-group">
+          <div class="form-label">品牌 Logo<span class="required">*</span></div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:64px;height:64px;background:#ff6b35;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:600;">SF</div>
+            <button class="btn btn-sm" onclick="toast('已打开品牌 Logo 上传选择器','info')">&#11014; 上传/更换</button>
+            <span style="font-size:11px;color:#9ca3af;">建议 PNG/JPG · 1:1 · ≤ 200KB · 透明底优先</span>
+          </div>
+          <div class="form-hint">展示在 C 端详情页头部，代表品牌身份</div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">关于技能<span class="required">*</span></div>
+          <textarea class="form-textarea" placeholder="介绍该技能的功能定位与服务范围...">顺丰运费估算技能帮助你快速了解寄件费用。支持标准快递、特快、同城急送等多种服务产品的运费查询，覆盖全国 300+ 城市。</textarea>
+          <div class="form-hint">详情页正文，向 C 端用户介绍本技能</div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">我能为你做<span class="required">*</span></div>
+          <textarea class="form-textarea" style="min-height:72px;" placeholder="列出能力点，每行一条...">• 查询任意两城市间的快递运费
+• 对比不同服务类型（标快/特快/同城）的价格
+• 估算不同重量包裹的运费</textarea>
+          <div class="form-hint">能力点列表，每行一条，建议 3-6 条</div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn" onclick="closeDrawer('skillConfig')">取消</button>
+      <button class="btn" onclick="saveSkillConfigDraft()">保存草稿</button>
+      <button class="btn btn-primary" onclick="goPage('skillDebug');closeDrawer('skillConfig');">前往调试 &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DRAWER: Skill 文件查看（Skill 包内容浏览） ===== -->
+<div class="drawer-overlay" id="drawer-skillFiles">
+  <div class="drawer" style="width:1080px;">
+    <div class="drawer-header">
+      <div>
+        <h3 style="margin:0;display:flex;align-items:center;gap:8px;">
+          Skill 文件 — 顺丰寄件
+          <span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;" id="sfAccessTag">沙箱托管</span>
+          <span class="tag" style="background:#e0f2fe;color:#0369a1;font-size:10px;" id="sfModeTag">只读</span>
+        </h3>
+        <div style="font-size:12px;color:#9ca3af;margin-top:2px;">slug: sf-express-shipping · 包大小 24.5 KB · 6 个文件 · 支持查看 / 编辑</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer('skillFiles')">&times;</button>
+    </div>
+    <div class="drawer-body" style="padding:0;display:flex;flex-direction:column;height:calc(100% - 60px);">
+      <!-- 顶部工具栏 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #e5e7eb;background:#fafbfc;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <select class="form-input" style="width:160px;font-size:12px;height:30px;">
+            <option>v1.0（已上架）</option>
+            <option>v0.9</option>
+            <option>v0.1（初始草稿）</option>
+          </select>
+          <span style="font-size:11px;color:#6b7280;">支持<strong>查看 / 编辑</strong>；保存后自动产生新版本草稿</span>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm" id="sfModeBtn" onclick="toggleSkillFileEdit()">&#9998; 进入编辑</button>
+          <button class="btn btn-sm" onclick="toast('已下载该版本的 .zip 原包','success')">&#11015; 下载原包</button>
+          <button class="btn btn-sm" onclick="toast('打开版本对比视图（v1.0 vs v0.9 文件差异）','info')">&#8651; 版本对比</button>
+        </div>
+      </div>
+
+      <!-- 主体：左侧文件树 + 右侧代码查看 -->
+      <div style="flex:1;display:flex;overflow:hidden;">
+        <!-- 文件树 -->
+        <div style="width:280px;border-right:1px solid #e5e7eb;background:#fafbfc;overflow-y:auto;padding:10px 0;font-size:13px;">
+          <div style="padding:6px 14px;color:#9ca3af;font-size:11px;text-transform:uppercase;">文件树</div>
+          <div class="sf-tree-item active" onclick="selectSkillFile(this,'skill.yaml')" style="padding:6px 14px;cursor:pointer;display:flex;align-items:center;gap:6px;background:#eef2ff;color:#4338ca;font-weight:500;">
+            <span>&#128196;</span> skill.yaml
+            <span style="margin-left:auto;font-size:10px;color:#9ca3af;font-weight:400;">1.2 KB</span>
+          </div>
+          <div class="sf-tree-item" onclick="selectSkillFile(this,'tool_schema.json')" style="padding:6px 14px;cursor:pointer;display:flex;align-items:center;gap:6px;color:#374151;">
+            <span>&#128196;</span> tool_schema.json
+            <span style="margin-left:auto;font-size:10px;color:#9ca3af;">2.4 KB</span>
+          </div>
+          <div style="padding:4px 14px;color:#9ca3af;font-size:12px;">&#128193; src/</div>
+          <div class="sf-tree-item" onclick="selectSkillFile(this,'src/handler.py')" style="padding:6px 14px 6px 28px;cursor:pointer;display:flex;align-items:center;gap:6px;color:#374151;">
+            <span>&#128221;</span> handler.py
+            <span style="margin-left:auto;font-size:10px;color:#9ca3af;">8.6 KB</span>
+          </div>
+          <div class="sf-tree-item" onclick="selectSkillFile(this,'src/utils.py')" style="padding:6px 14px 6px 28px;cursor:pointer;display:flex;align-items:center;gap:6px;color:#374151;">
+            <span>&#128221;</span> utils.py
+            <span style="margin-left:auto;font-size:10px;color:#9ca3af;">3.1 KB</span>
+          </div>
+          <div class="sf-tree-item" onclick="selectSkillFile(this,'README.md')" style="padding:6px 14px;cursor:pointer;display:flex;align-items:center;gap:6px;color:#374151;">
+            <span>&#128209;</span> README.md
+            <span style="margin-left:auto;font-size:10px;color:#9ca3af;">1.8 KB</span>
+          </div>
+          <div class="sf-tree-item" onclick="selectSkillFile(this,'requirements.txt')" style="padding:6px 14px;cursor:pointer;display:flex;align-items:center;gap:6px;color:#374151;">
+            <span>&#128196;</span> requirements.txt
+            <span style="margin-left:auto;font-size:10px;color:#9ca3af;">186 B</span>
+          </div>
+
+          <div style="padding:8px 14px;color:#9ca3af;font-size:11px;border-top:1px solid #e5e7eb;margin-top:8px;text-transform:uppercase;">沙箱运行</div>
+          <div style="padding:6px 14px;font-size:11px;color:#6b7280;line-height:1.7;">
+            <div>运行时：Python 3.11</div>
+            <div>资源：256MB · 30s 超时</div>
+            <div style="color:#059669;">&#10003; 安全扫描通过</div>
+          </div>
+        </div>
+
+        <!-- 代码查看区 -->
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:#fff;">
+          <!-- 文件路径 + 操作 -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid #e5e7eb;background:#fafbfc;">
+            <div style="font-family:monospace;font-size:12px;color:#374151;" id="sfCurrentPath">skill.yaml</div>
+            <div style="display:flex;gap:6px;">
+              <span style="font-size:11px;color:#9ca3af;align-self:center;margin-right:4px;" id="sfCurrentMeta">YAML · 36 行 · UTF-8</span>
+              <button class="btn btn-sm btn-ghost" onclick="toast('文件内容已复制到剪贴板','success')">复制</button>
+              <button class="btn btn-sm btn-ghost" onclick="toast('在新窗口打开纯文本视图','info')">原文</button>
+              <button class="btn btn-sm btn-primary" id="sfSaveBtn" style="display:none;" onclick="saveSkillFileEdit()">保存为新版本草稿</button>
+            </div>
+          </div>
+
+          <!-- 代码内容（带行号） -->
+          <div id="sfCodeArea" style="flex:1;overflow:auto;background:#0f172a;color:#e2e8f0;font-family:'SFMono-Regular',Consolas,Monaco,monospace;font-size:12px;line-height:1.7;">
+<pre style="margin:0;padding:16px 0;"><code id="sfCodeContent"><span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">1</span><span><span style="color:#94a3b8;"># Skill 元数据声明（iSkill 规范 v1）</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">2</span><span><span style="color:#f472b6;">name</span>: sf-express-shipping</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">3</span><span><span style="color:#f472b6;">display_name</span>: <span style="color:#bef264;">"顺丰寄件"</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">4</span><span><span style="color:#f472b6;">version</span>: <span style="color:#bef264;">"1.0.0"</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">5</span><span><span style="color:#f472b6;">description</span>: <span style="color:#bef264;">"帮助用户创建顺丰快递寄件订单，支持运费估算、地址簿管理、进度查询。"</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">6</span><span><span style="color:#f472b6;">author</span>: <span style="color:#bef264;">"顺丰速运官方"</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">7</span><span><span style="color:#f472b6;">category</span>: <span style="color:#bef264;">"logistics"</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">8</span><span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">9</span><span><span style="color:#94a3b8;"># 入口与运行时</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">10</span><span><span style="color:#f472b6;">entry</span>: src/handler.py:invoke</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">11</span><span><span style="color:#f472b6;">runtime</span>: python-3.11</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">12</span><span><span style="color:#f472b6;">timeout_ms</span>: 30000</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">13</span><span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">14</span><span><span style="color:#94a3b8;"># 触发词</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">15</span><span><span style="color:#f472b6;">triggers</span>:</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">16</span><span>  - <span style="color:#bef264;">"寄快递"</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">17</span><span>  - <span style="color:#bef264;">"顺丰下单"</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">18</span><span>  - <span style="color:#bef264;">"我要寄件"</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">19</span><span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">20</span><span><span style="color:#94a3b8;"># 工具定义索引</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">21</span><span><span style="color:#f472b6;">tools</span>:</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">22</span><span>  - <span style="color:#f472b6;">name</span>: createOrder</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">23</span><span>    <span style="color:#f472b6;">schema_ref</span>: tool_schema.json#/createOrder</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">24</span><span>  - <span style="color:#f472b6;">name</span>: queryStatus</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">25</span><span>    <span style="color:#f472b6;">schema_ref</span>: tool_schema.json#/queryStatus</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">26</span><span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">27</span><span><span style="color:#94a3b8;"># 知识库绑定（运行时由配置覆盖）</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">28</span><span><span style="color:#f472b6;">knowledge_bases</span>:</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">29</span><span>  - <span style="color:#bef264;">"sf-policy-faq"</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">30</span><span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">31</span><span><span style="color:#94a3b8;"># 资源限额</span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">32</span><span><span style="color:#f472b6;">resources</span>:</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">33</span><span>  <span style="color:#f472b6;">memory_mb</span>: 256</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">34</span><span>  <span style="color:#f472b6;">cpu</span>: 0.5</span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">35</span><span></span></span>
+<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">36</span><span><span style="color:#94a3b8;"># EOF</span></span></span>
+</code></pre>
+<textarea id="sfEditArea" style="display:none;width:100%;height:100%;box-sizing:border-box;background:#0f172a;color:#e2e8f0;font-family:'SFMono-Regular',Consolas,Monaco,monospace;font-size:12px;line-height:1.7;border:none;outline:none;padding:16px 18px;resize:none;"></textarea>
+          </div>
+
+          <!-- 底部状态栏 -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 16px;border-top:1px solid #e5e7eb;background:#fafbfc;font-size:11px;color:#6b7280;">
+            <span id="sfStatusHint">&#9432; 默认只读模式；点击右上「进入编辑」可在线修改文件内容，保存后自动产生新版本草稿。</span>
+            <span><span style="color:#059669;">&#10003;</span> 包完整性校验通过</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DRAWER: 知识库详情 ===== -->
+<div class="drawer-overlay" id="drawer-kbDetail">
+  <div class="drawer" style="width:920px;">
+    <div class="drawer-header">
+      <div>
+        <h3 style="margin:0;">📚 顺丰品牌知识库</h3>
+        <div style="font-size:12px;color:#9ca3af;margin-top:2px;">brand_kb · 最近更新 2026-06-17 14:32</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer('kbDetail')">&times;</button>
+    </div>
+    <div class="drawer-body">
+      <!-- 条件 banner：仅当 staged > 0 显示 -->
+      <div id="kbStagedBanner" style="margin-bottom:18px;padding:12px 14px;background:linear-gradient(90deg,#fffbeb,#fef3c7);border:1px solid #fcd34d;border-left:4px solid #d97706;border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div style="font-size:13px;line-height:1.6;color:#92400e;">
+          <strong>💡 你有 3 个文件已索引完成处于「预发布」</strong>，C 端用户尚未生效。<br>
+          <span style="font-size:12px;">建议先在「Skill 调试」中验证效果 → 确认无误后点击「上线」推送到 C 端真实召回。</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+          <button class="btn btn-sm btn-primary" style="background:#d97706;border-color:#d97706;" onclick="window.location.hash='page-skillDebug';closeDrawer('kbDetail');toast('已切换到 Skill 调试','info');">前往 Skill 调试 →</button>
+          <button class="btn btn-sm" onclick="document.getElementById('kbFileFilter').value='staged';filterKbFiles();toast('已筛选预发布文件','info');">筛选预发布 →</button>
+        </div>
+      </div>
+
+      <!-- 概要 stat：4 项 -->
+      <div style="display:flex;gap:12px;margin-bottom:18px;">
+        <div style="flex:1;background:#f9fafb;border-radius:8px;padding:14px;">
+          <div style="font-size:12px;color:#6b7280;">总文件数</div>
+          <div style="font-size:22px;font-weight:600;">12 个</div>
+          <div style="font-size:10px;color:#9ca3af;margin-top:2px;">含 782 chunks · 14.3MB</div>
+        </div>
+        <div style="flex:1;background:#eff6ff;border-radius:8px;padding:14px;border:1px solid #bfdbfe;">
+          <div style="font-size:12px;color:#1e40af;">处理中</div>
+          <div style="font-size:22px;font-weight:600;color:#2563eb;">1 个</div>
+          <div style="font-size:10px;color:#1e40af;margin-top:2px;">解析/机审/索引</div>
+        </div>
+        <div style="flex:1;background:#fef3c7;border-radius:8px;padding:14px;border:1px solid #fcd34d;">
+          <div style="font-size:12px;color:#92400e;">🟠 预发布</div>
+          <div style="font-size:22px;font-weight:600;color:#d97706;">3 个</div>
+          <div style="font-size:10px;color:#92400e;margin-top:2px;">索引完成 · 待上线</div>
+        </div>
+        <div style="flex:1;background:#dcfce7;border-radius:8px;padding:14px;border:1px solid #86efac;">
+          <div style="font-size:12px;color:#166534;">✅ 已上线</div>
+          <div style="font-size:22px;font-weight:600;color:#059669;">7 个</div>
+          <div style="font-size:10px;color:#166534;margin-top:2px;">C 端可召回</div>
+        </div>
+      </div>
+
+      <!-- Tabs（去版本历史，保留 3 个） -->
+      <div class="tabs">
+        <div class="tab-item active" onclick="switchKbTab('files')">文件管理 (12)</div>
+        <div class="tab-item" onclick="switchKbTab('bindSkill')">绑定 Skill</div>
+        <div class="tab-item" onclick="switchKbTab('recallTest')">召回测试</div>
+      </div>
+
+      <!-- 文件管理 Tab -->
+      <div id="kbtab-files">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <select class="form-input" id="kbFileFilter" onchange="filterKbFiles()" style="width:160px;height:30px;font-size:12px;">
+              <option value="">全部状态</option>
+              <option value="processing">处理中</option>
+              <option value="rejected">机审驳回</option>
+              <option value="staged">🟠 预发布</option>
+              <option value="online">✅ 已上线</option>
+              <option value="offline">⚪ 已下线</option>
+            </select>
+            <input class="form-input" placeholder="搜索文件名..." style="width:180px;height:30px;font-size:12px;" oninput="filterKbFiles()">
+            <button class="btn btn-sm" id="batchOnlineBtn" onclick="batchOnlineStaged()" style="display:none;background:#d97706;color:#fff;border-color:#d97706;">✅ 一键上线选中 <span id="batchOnlineCnt">0</span> 个</button>
+          </div>
+          <button class="btn btn-sm btn-primary" onclick="document.getElementById('kbUploadArea').style.display='block'">+ 上传文件</button>
+        </div>
+        <div id="kbUploadArea" class="form-upload" style="margin-bottom:16px;display:none;">
+          <div style="font-size:24px;margin-bottom:4px;">📄</div>
+          <div style="font-size:13px;">点击或拖拽文件到此处上传</div>
+          <div style="font-size:11px;color:#9ca3af;margin-top:4px;">Excel / PDF / Word / 图片 / TXT / 超链接 · 单文件 ≤ 20MB · 上传后自动走解析→机审→索引→预发布</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:32px"><input type="checkbox" id="kbSelAll" onclick="toggleSelAllStaged(this)"></th>
+                <th>文件名</th>
+                <th style="width:60px">格式</th>
+                <th style="width:70px">片段</th>
+                <th style="width:140px">线上状态</th>
+                <th style="width:120px">上传时间</th>
+                <th style="width:240px">操作</th>
+              </tr>
+            </thead>
+            <tbody id="kbFileTbody">
+              <!-- online -->
+              <tr data-status="online">
+                <td>—</td>
+                <td>📊 顺丰服务政策FAQ.xlsx</td>
+                <td><span class="tag" style="background:#ecfdf5;color:#059669;font-size:10px;">Excel</span></td>
+                <td>18 条</td>
+                <td><span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span></td>
+                <td>2026-06-10</td>
+                <td>
+                  <button class="btn btn-sm btn-ghost" onclick="previewKbFile('顺丰服务政策FAQ.xlsx')">预览</button>
+                  <button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,'顺丰服务政策FAQ.xlsx')">下线</button>
+                  <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'顺丰服务政策FAQ.xlsx','online')">删除</button>
+                </td>
+              </tr>
+              <tr data-status="online">
+                <td>—</td>
+                <td>📕 寄件收费标准2026.pdf</td>
+                <td><span class="tag" style="background:#fee2e2;color:#dc2626;font-size:10px;">PDF</span></td>
+                <td>6 段</td>
+                <td><span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span></td>
+                <td>2026-06-10</td>
+                <td>
+                  <button class="btn btn-sm btn-ghost" onclick="previewKbFile('寄件收费标准2026.pdf')">预览</button>
+                  <button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,'寄件收费标准2026.pdf')">下线</button>
+                  <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'寄件收费标准2026.pdf','online')">删除</button>
+                </td>
+              </tr>
+              <tr data-status="online">
+                <td>—</td>
+                <td>📘 禁寄物品清单.docx</td>
+                <td><span class="tag" style="background:#dbeafe;color:#1e40af;font-size:10px;">Word</span></td>
+                <td>4 段</td>
+                <td><span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span></td>
+                <td>2026-06-09</td>
+                <td>
+                  <button class="btn btn-sm btn-ghost" onclick="previewKbFile('禁寄物品清单.docx')">预览</button>
+                  <button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,'禁寄物品清单.docx')">下线</button>
+                  <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'禁寄物品清单.docx','online')">删除</button>
+                </td>
+              </tr>
+              <!-- staged -->
+              <tr data-status="staged" style="background:#fffbeb;">
+                <td><input type="checkbox" class="kbStagedCk" onclick="updateBatchOnlineBtn()"></td>
+                <td>📊 618活动规则.xlsx</td>
+                <td><span class="tag" style="background:#ecfdf5;color:#059669;font-size:10px;">Excel</span></td>
+                <td>8 条</td>
+                <td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">🟠 预发布</span></td>
+                <td>2026-06-17 14:25</td>
+                <td>
+                  <button class="btn btn-sm btn-ghost" onclick="window.location.hash='page-skillDebug';closeDrawer('kbDetail');toast('在 Skill 调试中验证该文件','info');">调试预览</button>
+                  <button class="btn btn-sm btn-primary" style="background:#d97706;border-color:#d97706;" onclick="onlineKbDoc(this,'618活动规则.xlsx')">✅ 上线</button>
+                  <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'618活动规则.xlsx','staged')">删除</button>
+                </td>
+              </tr>
+              <tr data-status="staged" style="background:#fffbeb;">
+                <td><input type="checkbox" class="kbStagedCk" onclick="updateBatchOnlineBtn()"></td>
+                <td>🔗 理赔流程说明（超链接）</td>
+                <td><span class="tag" style="background:#ede9fe;color:#6d28d9;font-size:10px;">Link</span></td>
+                <td>3 段</td>
+                <td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">🟠 预发布</span></td>
+                <td>2026-06-17 11:08</td>
+                <td>
+                  <button class="btn btn-sm btn-ghost" onclick="window.location.hash='page-skillDebug';closeDrawer('kbDetail');toast('在 Skill 调试中验证该文件','info');">调试预览</button>
+                  <button class="btn btn-sm btn-primary" style="background:#d97706;border-color:#d97706;" onclick="onlineKbDoc(this,'理赔流程说明')">✅ 上线</button>
+                  <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'理赔流程说明','staged')">删除</button>
+                </td>
+              </tr>
+              <tr data-status="staged" style="background:#fffbeb;">
+                <td><input type="checkbox" class="kbStagedCk" onclick="updateBatchOnlineBtn()"></td>
+                <td>📕 2026会员权益手册.pdf</td>
+                <td><span class="tag" style="background:#fee2e2;color:#dc2626;font-size:10px;">PDF</span></td>
+                <td>11 条</td>
+                <td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">🟠 预发布</span></td>
+                <td>2026-06-16 09:42</td>
+                <td>
+                  <button class="btn btn-sm btn-ghost" onclick="window.location.hash='page-skillDebug';closeDrawer('kbDetail');toast('在 Skill 调试中验证该文件','info');">调试预览</button>
+                  <button class="btn btn-sm btn-primary" style="background:#d97706;border-color:#d97706;" onclick="onlineKbDoc(this,'2026会员权益手册.pdf')">✅ 上线</button>
+                  <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'2026会员权益手册.pdf','staged')">删除</button>
+                </td>
+              </tr>
+              <!-- processing -->
+              <tr data-status="processing">
+                <td>—</td>
+                <td>📕 国际件清关须知.pdf <span style="font-size:10px;color:#2563eb;">[索引中 73%]</span></td>
+                <td><span class="tag" style="background:#fee2e2;color:#dc2626;font-size:10px;">PDF</span></td>
+                <td>—</td>
+                <td><span class="tag" style="background:#dbeafe;color:#1e40af;font-size:10px;">⏳ 索引中</span></td>
+                <td>2026-06-17 14:30</td>
+                <td>
+                  <button class="btn btn-sm btn-ghost" onclick="confirmThen('确认取消上传？已上传内容将被清除。',()=>{removeRow(document.querySelector('[data-status=processing]'),'国际件清关须知.pdf');});">取消上传</button>
+                </td>
+              </tr>
+              <!-- rejected -->
+              <tr data-status="rejected" style="background:#fef2f2;">
+                <td>—</td>
+                <td>📊 内部价格表.xlsx <span style="font-size:10px;color:#dc2626;">[机审驳回]</span></td>
+                <td><span class="tag" style="background:#ecfdf5;color:#059669;font-size:10px;">Excel</span></td>
+                <td>—</td>
+                <td><span class="tag" style="background:#fee2e2;color:#dc2626;font-size:10px;">❌ 机审驳回</span></td>
+                <td>2026-06-17 10:15</td>
+                <td>
+                  <button class="btn btn-sm btn-ghost" onclick="alert('驳回原因：检测到内部成本数据（敏感信息），请脱敏后重新上传。\\n\\n建议：移除采购价 / 利润率字段后重传。')">查看原因</button>
+                  <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'内部价格表.xlsx','rejected')">删除</button>
+                </td>
+              </tr>
+              <!-- offline -->
+              <tr data-status="offline" style="opacity:0.7;">
+                <td>—</td>
+                <td>📊 双11活动规则.xlsx</td>
+                <td><span class="tag" style="background:#ecfdf5;color:#059669;font-size:10px;">Excel</span></td>
+                <td>5 条</td>
+                <td><span class="tag" style="background:#f3f4f6;color:#6b7280;font-size:10px;">⚪ 已下线</span></td>
+                <td>2025-11-08</td>
+                <td>
+                  <button class="btn btn-sm btn-ghost" onclick="previewKbFile('双11活动规则.xlsx')">预览</button>
+                  <button class="btn btn-sm btn-primary" onclick="reonlineKbDoc(this,'双11活动规则.xlsx')">重新上线</button>
+                  <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'双11活动规则.xlsx','offline')">删除</button>
+                </td>
+              </tr>
+              <tr data-status="offline" style="opacity:0.7;">
+                <td>—</td>
+                <td>📘 旧版理赔条款.docx</td>
+                <td><span class="tag" style="background:#dbeafe;color:#1e40af;font-size:10px;">Word</span></td>
+                <td>7 段</td>
+                <td><span class="tag" style="background:#f3f4f6;color:#6b7280;font-size:10px;">⚪ 已下线</span></td>
+                <td>2025-09-22</td>
+                <td>
+                  <button class="btn btn-sm btn-ghost" onclick="previewKbFile('旧版理赔条款.docx')">预览</button>
+                  <button class="btn btn-sm btn-primary" onclick="reonlineKbDoc(this,'旧版理赔条款.docx')">重新上线</button>
+                  <button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,'旧版理赔条款.docx','offline')">删除</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:16px;padding:10px 14px;background:#f9fafb;border-radius:6px;font-size:11px;color:#6b7280;line-height:1.7;">
+          <strong style="color:#374151;">8 态状态机说明：</strong>
+          上传 → ⏳ 处理中（解析/机审/索引）→ <span style="color:#d97706;font-weight:600;">🟠 预发布</span> → <span style="color:#059669;font-weight:600;">✅ 已上线</span> → ⚪ 已下线 / 删除（物理清除）<br>
+          <strong style="color:#374151;">替换内容路径：</strong>下线旧文件 → 删除 → 重新上传新文件（本期不支持版本中转或 in-place 修改）。
+        </div>
+      </div>
+
+      <!-- 绑定 Skill Tab -->
+      <div id="kbtab-bindSkill" style="display:none;">
+        <div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:#6b7280;">展示当前绑定该 KB 的 Skill 列表。从知识库创建的 Skill 自动绑定，导入的 Skill 需手动绑定。</span>
+          <button class="btn btn-sm" onclick="bindSkillToKB()">+ 绑定 Skill</button>
+        </div>
+        <table>
+          <thead><tr><th>Skill 名称</th><th>Skill 状态</th><th>绑定方式</th><th>实际可召回范围</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr><td>顺丰寄件</td><td><span class="tag tag-online">已上架</span></td><td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">创建时自动绑定</span></td><td><strong style="color:#059669;">✅ 已上线 chunk</strong></td><td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="unbindSkillFromKB(this,'顺丰寄件')">解绑</button></td></tr>
+            <tr><td>顺丰运费估算</td><td><span class="tag tag-online">已上架</span></td><td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">创建时自动绑定</span></td><td><strong style="color:#059669;">✅ 已上线 chunk</strong></td><td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="unbindSkillFromKB(this,'顺丰运费估算')">解绑</button></td></tr>
+            <tr><td>国际寄件</td><td><span class="tag tag-online">已上架</span></td><td><span class="tag" style="background:#eff6ff;color:#1e40af;font-size:10px;">手动绑定</span></td><td><strong style="color:#059669;">✅ 已上线 chunk</strong></td><td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="unbindSkillFromKB(this,'国际寄件')">解绑</button></td></tr>
+            <tr><td>品牌问答Skill</td><td><span class="tag tag-draft">草稿调试中</span></td><td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">创建时自动绑定</span></td><td><strong style="color:#d97706;">🟠 全量已索引</strong></td><td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="unbindSkillFromKB(this,'品牌问答Skill')">解绑</button></td></tr>
+          </tbody>
+        </table>
+        <div style="padding:12px 14px;background:#f9fafb;border-radius:6px;font-size:11px;color:#6b7280;line-height:1.6;margin-top:12px;">
+          ℹ️ 已上架 Skill 仅召回「✅ 已上线」chunk；草稿/调试中 Skill 召回全量已索引（含预发布/已下线）以便验证。
+        </div>
+      </div>
+
+      <!-- 召回测试 Tab -->
+      <div id="kbtab-recallTest" style="display:none;">
+        <!-- 顶部范围提示条 -->
+        <div style="margin-bottom:16px;padding:12px 14px;background:linear-gradient(90deg,#eff6ff,#fef3c7);border:1px solid #fcd34d;border-radius:8px;font-size:12px;line-height:1.7;color:#374151;">
+          <strong>🔍 召回测试范围：</strong>
+          <span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;margin:0 2px;">✅ 已上线 7</span> +
+          <span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;margin:0 2px;">🟠 预发布 3</span> +
+          <span class="tag" style="background:#f3f4f6;color:#6b7280;font-size:10px;margin:0 2px;">⚪ 已下线 2</span>
+          <strong>（全量已索引）</strong><br>
+          <span style="color:#6b7280;">仅 ✅ 已上线 内容会在 C 端真实召回；🟠 预发布 / ⚪ 已下线 仅供你诊断验证。</span>
+          <label style="float:right;font-size:11px;cursor:pointer;color:#2563eb;">
+            <input type="checkbox" id="recallSimC" onchange="toggleRecallSimC(this)" style="vertical-align:middle;"> 仅模拟 C 端（仅已上线）
+          </label>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;gap:8px;margin-bottom:14px;">
+            <input class="form-input" id="recallInput" placeholder="输入测试 query，如：618 寄快递有折扣吗" style="flex:1;">
+            <button class="btn btn-primary" onclick="runRecallTest()">测试召回</button>
+          </div>
+
+          <div id="recallResult" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+            <div style="background:#fafbfc;padding:10px 14px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:12px;font-weight:500;">召回结果（Top 3）</span>
+              <span style="font-size:11px;color:#6b7280;">查询：「618 寄快递有折扣吗」</span>
+            </div>
+            <div style="padding:14px;">
+              <!-- Top1 staged 命中 -->
+              <div style="border:1px solid #fcd34d;border-radius:6px;padding:12px;margin-bottom:10px;background:#fffbeb;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:12px;font-weight:600;color:#d97706;">Top 1 · 相似度 0.94</span>
+                  <span style="font-size:11px;color:#6b7280;">来源：618活动规则.xlsx · 第3条 <span class="tag" style="background:#fef3c7;color:#92400e;font-size:9px;padding:1px 4px;">🟠 预发布</span></span>
+                </div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Q: 618 期间寄快递有什么优惠？</div>
+                <div style="font-size:12px;color:#374151;line-height:1.6;">A: 618 期间标快 8 折，同城次日达 6 折优惠。活动时间 6 月 1 日 - 6 月 20 日，下单时自动减免，不可与其他优惠叠加。</div>
+                <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #fcd34d;font-size:11px;color:#92400e;">⚠ 该 chunk 来自预发布文件，C 端用户实际看不到。如需对 C 端生效请前往 KB 详情点击「上线」。</div>
+              </div>
+              <!-- Top2 online 命中 -->
+              <div style="border:1px solid #d1fae5;border-radius:6px;padding:12px;margin-bottom:10px;background:#f0fdf4;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:12px;font-weight:600;color:#059669;">Top 2 · 相似度 0.72</span>
+                  <span style="font-size:11px;color:#6b7280;">来源：寄件收费标准2026.pdf · 第1段 <span class="tag" style="background:#dcfce7;color:#166534;font-size:9px;padding:1px 4px;">✅ 已上线</span></span>
+                </div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:4px;">A: 标准快递首重 12 元/kg，续重 6 元/kg。特快首重 22 元/kg…</div>
+              </div>
+              <!-- Top3 offline 命中 -->
+              <div style="border:1px solid #e5e7eb;border-radius:6px;padding:12px;background:#f9fafb;opacity:0.85;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:12px;font-weight:600;color:#6b7280;">Top 3 · 相似度 0.58</span>
+                  <span style="font-size:11px;color:#6b7280;">来源：双11活动规则.xlsx · 第2条 <span class="tag" style="background:#f3f4f6;color:#6b7280;font-size:9px;padding:1px 4px;">⚪ 已下线</span></span>
+                </div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:4px;color:#6b7280;">A: 双11期间标快 7 折，同城 5 折…（已过期 / 已下线）</div>
+                <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #d1d5db;font-size:11px;color:#6b7280;">⚠ 该 chunk 来自已下线文件。C 端用户不会看到。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:12px 14px;background:#f9fafb;border-radius:8px;font-size:12px;color:#6b7280;line-height:1.6;">
+          ℹ️ 召回测试为<strong>纯诊断工具</strong>，结果不影响线上文件状态。如对预发布内容效果满意，请前往「文件管理」点击对应文件的「上线」按钮。
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn" onclick="closeDrawer('kbDetail')">关闭</button>
+      <button class="btn" onclick="editKbBasicInfo()">编辑基本信息</button>
+      <button class="btn btn-primary" onclick="openModal('genSkill');closeDrawer('kbDetail');">从知识库创建 Skill</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: KB 发布到线上确认 ===== -->
+<div class="modal-overlay" id="modal-kbPublish">
+  <div class="modal" style="width:480px;">
+    <div class="modal-header">
+      <h3>发布更新内容到线上</h3>
+      <button class="modal-close" onclick="closeModal('kbPublish')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#fef3c7;border-left:3px solid #d97706;padding:12px 14px;border-radius:6px;font-size:13px;color:#92400e;line-height:1.7;margin-bottom:16px;">
+        <strong>&#9888; 即将发布以下更新到线上：</strong>
+      </div>
+      <div style="background:#f9fafb;border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;">
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #e5e7eb;">
+          <span style="color:#6b7280;">知识库名称</span>
+          <strong>顺丰服务政策FAQ</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #e5e7eb;">
+          <span style="color:#6b7280;">变更内容</span>
+          <strong style="color:#d97706;">2 个待发布文件 / 3 条变更</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #e5e7eb;">
+          <span style="color:#6b7280;">影响 Skill</span>
+          <span>顺丰寄件、品牌问答Skill</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;">
+          <span style="color:#6b7280;">预计耗时</span>
+          <span>约 5~10 分钟</span>
+        </div>
+      </div>
+      <div style="background:#eff6ff;border-radius:8px;padding:12px 14px;font-size:12px;color:#1e40af;line-height:1.7;">
+        &#9432; <strong>说明：</strong>系统将发布最新上传的文件到线上。发布流程有一定时间，<strong>发布过程不会影响线上已有数据</strong>——线上 Skill 在切换完成前继续调用现有内容，切换瞬间无缝替换。
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('kbPublish')">取消</button>
+      <button class="btn btn-primary" onclick="confirmKbPublish()" style="background:#d97706;border-color:#d97706;">&#128640; 确认发布</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DRAWER: 资质提交表单 ===== -->
+<div class="drawer-overlay" id="drawer-qualForm">
+  <div class="drawer">
+    <div class="drawer-header">
+      <h3>提交企业资质</h3>
+      <button class="drawer-close" onclick="closeDrawer('qualForm')">&times;</button>
+    </div>
+    <div class="drawer-body">
+      <div class="wireframe-note">
+        <strong>交互说明：</strong>未认证商家填写此表单提交企业资质。OCR自动识别营业执照信息。提交后进入审核状态，审核通过解锁全部能力。
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">企业主体信息</div>
+        <div class="form-group">
+          <div class="form-label">营业执照<span class="required">*</span></div>
+          <div class="form-upload">
+            <div>&#128247; 上传营业执照扫描件/照片</div>
+            <div style="font-size:11px;margin-top:4px;">支持JPG/PNG/PDF，上传后自动OCR识别</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">企业全称<span class="required">*</span></div>
+            <input class="form-input" placeholder="须与营业执照完全一致">
+          </div>
+          <div class="form-group">
+            <div class="form-label">统一社会信用代码<span class="required">*</span></div>
+            <input class="form-input" placeholder="18位">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">法定代表人<span class="required">*</span></div>
+            <input class="form-input" placeholder="">
+          </div>
+          <div class="form-group">
+            <div class="form-label">企业类型<span class="required">*</span></div>
+            <select class="form-input"><option>请选择</option><option>有限责任公司</option><option>股份有限公司</option></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">注册地址 / 经营范围<span class="required">*</span></div>
+          <textarea class="form-textarea" style="min-height:50px;" placeholder="取自营业执照"></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">品牌权属</div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">品牌名称<span class="required">*</span></div>
+            <input class="form-input" placeholder="C端展示的品牌名">
+          </div>
+          <div class="form-group">
+            <div class="form-label">商标注册证 / 品牌授权书</div>
+            <div class="form-upload" style="padding:12px;">上传证明文件</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">服务类目与行业资质</div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">行业类目<span class="required">*</span></div>
+            <select class="form-input"><option>请选择行业类目</option><option>物流快递</option><option>航空出行</option><option>餐饮服务</option><option>本地生活</option><option>数码电子</option></select>
+            <div class="form-hint">选择后可能触发行业资质上传要求</div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">行业经营许可（视类目）</div>
+            <div class="form-upload" style="padding:12px;">如食品经营许可、增值电信等</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">协议签署</div>
+        <label style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;cursor:pointer;">
+          <input type="checkbox" style="margin-top:3px;">
+          <span style="font-size:13px;">我已阅读并同意<a href="#" style="color:#6366f1;">《千问开放平台入驻协议》</a></span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;">
+          <input type="checkbox" style="margin-top:3px;">
+          <span style="font-size:13px;">我已阅读并同意<a href="#" style="color:#6366f1;">《三方隐私协议承诺》</a></span>
+        </label>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn" onclick="closeDrawer('qualForm')">取消</button>
+      <button class="btn btn-primary" onclick="submitQualForm()">提交审核</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: 创建 Skill（从知识库 · 多步骤向导） ===== -->
+<div class="modal-overlay" id="modal-createSkill">
+  <div class="modal" style="width:680px;">
+    <div class="modal-header">
+      <h3>从知识库创建 Skill <span style="font-size:12px;color:#9ca3af;font-weight:400;margin-left:8px;">第 <span id="cs-cur">1</span> / 2 步</span></h3>
+      <button class="drawer-close" onclick="closeModal('createSkill');csReset();">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Step header -->
+      <div style="margin-bottom:20px;">
+        <div class="step-indicator">
+          <div class="step-dot active" id="cs-dot-1">1</div><div class="step-line" id="cs-line-1"></div>
+          <div class="step-dot" id="cs-dot-2">2</div>
+        </div>
+        <div class="step-labels">
+          <span id="cs-label-1" style="color:#6366f1;font-weight:500;">选择源知识库</span>
+          <span id="cs-label-2">填写基本信息</span>
+        </div>
+      </div>
+
+      <!-- ============ STEP 1: 选择源知识库 ============ -->
+      <div id="cs-step-1">
+        <div style="background:#eff6ff;border-left:3px solid #2563eb;padding:12px 14px;border-radius:6px;font-size:12px;color:#1e40af;line-height:1.7;margin-bottom:14px;">
+          <strong>&#9432; 本期 Skill 创建方式：</strong>支持「从知识库创建」与「导入 Skill 包」两种入口。当前进入的是「从知识库创建」流程——平台基于源知识库内容自动萃取触发词、生成 tool_schema 与能力描述草稿；如已有完整 Skill 包，请关闭此向导并改用顶部「↑ 导入 Skill 文件」。
+        </div>
+
+        <div style="font-size:13px;font-weight:500;margin-bottom:8px;">选择源知识库 <span style="color:#dc2626;">*</span></div>
+        <select class="form-input" id="cs-kb-select" style="margin-bottom:10px;">
+          <option value="">请选择已创建并已生效的知识库...</option>
+          <option>顺丰服务政策FAQ（5个文件 · 39条片段 · 已生效）</option>
+          <option>顺丰运费规则（3个文件 · 18条片段 · 已生效）</option>
+          <option>顺丰寄件流程指引（2个文件 · 12条片段 · 已生效）</option>
+        </select>
+        <div style="background:#f9fafb;border-radius:8px;padding:12px 14px;font-size:11px;color:#6b7280;line-height:1.7;">
+          &#9432; <strong style="color:#374151;">平台将基于知识库内容自动生成：</strong><br>
+          · 触发词列表（基于 chunk 高频实体词 + 用户问法聚类）<br>
+          · tool_schema（自动包装为 kb_search_tool 调用）<br>
+          · Skill 能力描述与一句话简介（生成结果可在下一步编辑）<br>
+          · 自动绑定该知识库（因从 KB 创建）
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:#9ca3af;line-height:1.6;">
+          &#9432; 仅可选择「已生效」状态的知识库。如知识库还在草稿 / 发布中，请先完成发布流程。
+        </div>
+      </div>
+
+      <!-- ============ STEP 2: 基本信息 ============ -->
+      <div id="cs-step-2" style="display:none;">
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">Skill 中文名<span class="required">*</span></div>
+            <input class="form-input" placeholder="如：顺丰寄件">
+            <div class="form-hint">2-12 字，将展示给C端用户</div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Slug<span class="required">*</span></div>
+            <input class="form-input" placeholder="sf-express-shipping">
+            <div class="form-hint">英文标识，品牌命名空间内唯一</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">图标</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:40px;height:40px;background:#e5e7eb;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#999;font-size:18px;">+</div>
+              <span style="font-size:12px;color:#999;">点击上传 (PNG, ≥256×256)</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">一句话简介<span class="required">*</span></div>
+            <input class="form-input" placeholder="简短描述此 Skill 的核心能力">
+            <div class="form-hint">≤ 30 字，将展示在 Skill 卡片</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">可见性</div>
+          <div style="display:flex;gap:16px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+              <input type="radio" name="cs-vis" checked> 提交审核后公开（默认）
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+              <input type="radio" name="cs-vis"> 仅内部测试（白名单）
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ STEP 3 已移除：本期不开放沙箱/声明式接入方式选择 ============ -->
+
+      <!-- 完成创建后的预览（伪态：第2步完成后展示） -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="cs-prev-btn" style="display:none;" onclick="csPrevStep()">上一步</button>
+      <button class="btn" onclick="closeModal('createSkill');csReset();">取消</button>
+      <button class="btn btn-primary" id="cs-next-btn" onclick="csNextStep()">下一步</button>
+      <button class="btn btn-primary" id="cs-finish-btn" style="display:none;" onclick="csFinish();">创建草稿并继续配置 &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: 导入 Skill 文件 ===== -->
+<div class="modal-overlay" id="modal-importSkill">
+  <div class="modal" style="width:560px;">
+    <div class="modal-header">
+      <h3>导入 Skill 文件</h3>
+      <button class="drawer-close" onclick="closeModal('importSkill')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="wireframe-note" style="margin-bottom:16px;">
+        支持导入符合 iSkill 规范的 Skill 包文件，系统将自动解析配置并创建 Skill 草稿。导入后仍需完成调试与审核方可上架。
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">上传 Skill 文件<span class="required">*</span></div>
+        <div class="form-upload" style="padding:32px;">
+          <div style="font-size:28px;margin-bottom:8px;">&#128230;</div>
+          <div style="font-size:13px;font-weight:500;">点击或拖拽 Skill 包到此处</div>
+          <div style="font-size:11px;color:#9ca3af;margin-top:8px;">支持格式：.zip / .tar.gz（iSkill 标准包结构）</div>
+          <div style="font-size:11px;color:#9ca3af;margin-top:2px;">包含：skill.yaml / tool_schema.json / 代码文件</div>
+        </div>
+      </div>
+
+      <!-- 上传后解析预览 -->
+      <div style="border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-top:16px;">
+        <div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#6b7280;">&#9432; 文件解析预览（上传后显示）</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;">
+          <div><span style="color:#9ca3af;">Skill 名称：</span>sf-express-shipping</div>
+          <div><span style="color:#9ca3af;">版本：</span>1.0.0</div>
+          <div><span style="color:#9ca3af;">工具数：</span>2 个 tool</div>
+          <div><span style="color:#9ca3af;">文件大小：</span>24.5 KB</div>
+          <div style="grid-column:1/-1;"><span style="color:#9ca3af;">描述：</span>帮助用户创建顺丰快递寄件订单</div>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;">
+          <div style="font-size:11px;color:#6b7280;margin-bottom:6px;">包含文件：</div>
+          <div style="font-size:12px;font-family:monospace;color:#374151;line-height:1.8;background:#f9fafb;padding:8px 12px;border-radius:4px;">
+            ├── skill.yaml<br>
+            ├── tool_schema.json<br>
+            ├── src/<br>
+            │&nbsp;&nbsp; ├── handler.py<br>
+            │&nbsp;&nbsp; └── utils.py<br>
+            └── README.md
+          </div>
+        </div>
+      </div>
+
+      <!-- 覆盖/新建选择 -->
+      <div class="form-group" style="margin-top:16px;">
+        <div class="form-label">导入方式</div>
+        <div style="display:flex;gap:16px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+            <input type="radio" name="importMode" checked> 创建新 Skill
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+            <input type="radio" name="importMode"> 更新已有 Skill（新版本）
+          </label>
+        </div>
+      </div>
+
+      <!-- 更新已有时的选择 -->
+      <div class="form-group" style="opacity:0.5;">
+        <div class="form-label">选择要更新的 Skill</div>
+        <select class="form-input" disabled>
+          <option>— 选择已有 Skill —</option>
+          <option>顺丰寄件 (v1.0)</option>
+          <option>顺丰查件 (v1.0)</option>
+        </select>
+        <div class="form-hint">选择「更新已有 Skill」时启用</div>
+      </div>
+
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:10px 12px;font-size:11px;color:#92400e;margin-top:12px;">
+        &#9888; 导入后将进入格式验证 → 安全扫描（后台自动执行），通过后进入草稿/调试态。如有问题会通过站内通知告知。
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('importSkill')">取消</button>
+      <button class="btn btn-primary" onclick="confirmImportSkill()">确认导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: 创建知识库 ===== -->
+<div class="modal-overlay" id="modal-createKB">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>创建知识库</h3>
+      <button class="drawer-close" onclick="closeModal('createKB')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <div class="form-label">知识库名称<span class="required">*</span></div>
+        <input class="form-input" placeholder="如：品牌服务FAQ">
+      </div>
+      <div class="form-group">
+        <div class="form-label">描述</div>
+        <textarea class="form-textarea" style="min-height:50px;" placeholder="简短说明这个知识库包含什么内容"></textarea>
+      </div>
+      <div class="form-group">
+        <div class="form-label">初始文件上传（可选）</div>
+        <div class="form-upload">
+          <div>&#128196; 拖拽文件到此处或点击上传</div>
+          <div style="font-size:11px;margin-top:4px;">支持 Excel / PDF / Word / 图片 / 超链接；可批量上传多个文件</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('createKB')">取消</button>
+      <button class="btn btn-primary" onclick="confirmCreateKB()">创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: 从知识库创建 Skill（正式表单） ===== -->
+<div class="modal-overlay" id="modal-genSkill">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-header">
+      <h3>从知识库创建 Skill</h3>
+      <button class="drawer-close" onclick="closeModal('genSkill')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- 来源 KB 摘要（只读） -->
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:12px;color:#166534;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;">📚</span>
+        <div style="flex:1;line-height:1.6;">
+          <div><strong>来源知识库：</strong>顺丰品牌知识库（10 个文件 · 已上线 7 / 预发布 3）</div>
+          <div style="color:#15803d;font-size:11px;margin-top:2px;">创建后将自动绑定该知识库，可后续手动解绑。</div>
+        </div>
+      </div>
+
+      <!-- 1. Skill 名称 -->
+      <div class="form-group">
+        <div class="form-label">Skill 名称<span class="required">*</span></div>
+        <input class="form-input" placeholder="例如：顺丰售后助手" value="顺丰售后助手">
+        <div class="form-hint">展示在 C 端用户面前的中文名，建议 4-12 字，体现品牌+能力</div>
+      </div>
+
+      <!-- 2. Slug（前缀只读 + 后缀输入） -->
+      <div class="form-group">
+        <div class="form-label">Slug（唯一标识）<span class="required">*</span></div>
+        <div style="display:flex;align-items:stretch;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;background:#fff;">
+          <span style="background:#f3f4f6;color:#6b7280;padding:8px 12px;font-size:13px;font-family:'Monaco','Consolas',monospace;border-right:1px solid #d1d5db;display:flex;align-items:center;">shunfeng_</span>
+          <input class="form-input" style="border:none;border-radius:0;flex:1;font-family:'Monaco','Consolas',monospace;" placeholder="aftersale" value="aftersale">
+        </div>
+        <div class="form-hint">
+          完整 slug 示例：<code style="background:#f3f4f6;padding:2px 6px;border-radius:3px;font-size:11px;">shunfeng_aftersale</code>
+          ｜前缀 <code style="background:#f3f4f6;padding:2px 6px;border-radius:3px;font-size:11px;">shunfeng_</code> 由平台基于品牌主体生成，不可修改｜后缀仅支持小写英文/数字/下划线
+        </div>
+      </div>
+
+      <!-- 3. 能力描述 -->
+      <div class="form-group">
+        <div class="form-label">能力描述<span class="required">*</span></div>
+        <textarea class="form-textarea" style="min-height:72px;" placeholder="例如：本 Skill 帮助用户查询顺丰快递的退换货政策、运费规则、时效承诺等售后相关问题。">本 Skill 帮助用户查询顺丰快递的退换货政策、运费规则、时效承诺等售后相关问题。</textarea>
+        <div class="form-hint">向大模型描述本 Skill 能做什么，决定何时唤起；建议 30-100 字，避免泛化</div>
+      </div>
+
+      <!-- 4. 触发条件 -->
+      <div class="form-group">
+        <div class="form-label">触发条件<span class="required">*</span></div>
+        <textarea class="form-textarea" style="min-height:64px;" placeholder="例如：用户询问退货流程、运费计算、快递时效、丢件赔付等售后相关问题时触发。">用户询问退货流程、运费计算、快递时效、丢件赔付、寄件取件等售后相关问题时触发。</textarea>
+        <div class="form-hint">用户问什么样的 query 会触发本 Skill，可列举典型问法或场景关键词</div>
+      </div>
+
+      <!-- 5. 不触发条件 -->
+      <div class="form-group">
+        <div class="form-label">不触发条件 <span style="color:#9ca3af;font-weight:400;font-size:11px;">（选填）</span></div>
+        <textarea class="form-textarea" style="min-height:56px;" placeholder="例如：用户咨询其他快递公司业务、闲聊问候、与快递无关的问题。">用户咨询其他快递公司业务（如京东、菜鸟、申通）、闲聊问候、与快递无关的问题。</textarea>
+        <div class="form-hint">明确排除的场景，帮助模型区分边界，降低误唤起率</div>
+      </div>
+
+      <!-- 6. 其他信息补充 -->
+      <div class="form-group">
+        <div class="form-label">其他信息补充 <span style="color:#9ca3af;font-weight:400;font-size:11px;">（选填）</span></div>
+        <textarea class="form-textarea" style="min-height:56px;" placeholder="例如：本 Skill 仅服务顺丰大陆地区客户，国际件请引导至客服热线 95338。"></textarea>
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 12px;font-size:11px;color:#92400e;margin-top:6px;line-height:1.6;">
+          &#9888; 提交后平台将自动生成 tool_schema 与 skill.yaml 草稿（基于来源 KB 内容萃取），生成后可在 <strong>Skill 文件</strong> 中查看与编辑。生成的 Skill 需经过调试与审核方可上架。
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('genSkill')">取消</button>
+      <button class="btn btn-primary" onclick="confirmGenSkill()">提交并生成 Skill 草稿</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========= 通用 toast / 确认 / 表行删除 助手 =========
+function toast(msg, type) {
+  let host = document.getElementById('toastHost');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'toastHost';
+    document.body.appendChild(host);
+  }
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type || 'info');
+  const icons = { success:'✓', warn:'⚠', error:'✕', info:'ℹ' };
+  t.innerHTML = '<span class="toast-icon">'+(icons[type||'info'])+'</span>'+msg;
+  host.appendChild(t);
+  setTimeout(()=>t.classList.add('show'), 10);
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 220); }, 2400);
+}
+function confirmThen(question, fn) {
+  if (window.confirm(question)) fn();
+}
+function removeRow(btn, label) {
+  confirmThen('确认移除「' + label + '」？此操作可在审计日志中追溯。', function(){
+    const tr = btn.closest('tr');
+    if (tr) tr.style.transition='opacity .2s'; tr.style.opacity='0';
+    setTimeout(()=>{ if (tr) tr.remove(); toast('已移除「'+label+'」', 'success'); }, 200);
+  });
+}
+
+// Page navigation
+function goPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) el.classList.add('active');
+  
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (event && event.currentTarget && event.currentTarget.classList.contains('nav-item')) {
+    event.currentTarget.classList.add('active');
+  } else {
+    // find matching nav item
+    const titles = { home: '控制台首页', account: '账号与资质', qualSubmit: '提交入驻审核', skills: 'Skill 管理', kb: '知识库管理', recallTest: '召回测试', skillDebug: 'Skill 调试', e2eDebug: '端到端调试' };
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.textContent.trim().includes(titles[page]?.substring(0,4))) n.classList.add('active');
+    });
+  }
+  
+  const titleMap = { home: '控制台首页', account: '账号与资质', qualSubmit: '提交入驻审核', skills: 'Skill 管理', kb: '知识库管理', recallTest: '召回测试', debug: '调试工具' };
+  document.getElementById('topTitle').textContent = titleMap[page] || '';
+}
+
+// Drawers
+function openDrawer(name) {
+  const el = document.getElementById('drawer-' + name);
+  if (el) el.classList.add('show');
+}
+function closeDrawer(name) {
+  const el = document.getElementById('drawer-' + name);
+  if (el) el.classList.remove('show');
+}
+
+// Modals
+function openModal(name) {
+  const el = document.getElementById('modal-' + name);
+  if (el) el.classList.add('show');
+}
+function closeModal(name) {
+  const el = document.getElementById('modal-' + name);
+  if (el) el.classList.remove('show');
+}
+
+// Submit review check
+function submitReviewCheck() {
+  // 模拟根据调试活动分档提示
+  // 档位 A: 已做 Skill 调试 + E2E 调试 → 正常提交
+  // 档位 B: 仅做了 Skill 调试，未做 E2E → toast 建议
+  // 档位 C: 完全未调试 → confirmThen 二次确认
+
+  // Demo: 模拟档位 A（Skill 调试 3 次 + E2E 扫码 8 次）
+  const skillDebugCount = 3;  // 模拟数据
+  const e2eDebugCount = 8;    // 模拟数据
+
+  if (skillDebugCount > 0 && e2eDebugCount > 0) {
+    // 档位 A: 充分调试，正常提交
+    if (confirm('提交审核前校验：\n\n✓ Skill 元数据 — 已完成（名称/slug/概述/图标）\n✓ Skill 文件 — 能力描述 & 触发条件已写入\n✓ to C 数据 — 品牌 Logo / 关于技能 / 我能为你做 已填写\n\n确认提交审核？提交后审核员将在 1-2 个工作日内处理。')) {
+      toast('✓ 已提交审核，预计 1-2 个工作日内处理', 'success');
+      openDrawer('skillConfig');
+    }
+  } else if (skillDebugCount > 0 && e2eDebugCount === 0) {
+    // 档位 B: 仅 Skill 调试，未做 E2E
+    toast('💡 建议：完成端到端调试后再提交，充分调试可提高审核通过率', 'warning');
+    setTimeout(function() {
+      if (confirm('您尚未进行端到端调试。仍然提交审核？\n\n审核员可能会要求补充端到端验证。')) {
+        toast('✓ 已提交审核', 'success');
+        openDrawer('skillConfig');
+      }
+    }, 500);
+  } else {
+    // 档位 C: 完全未调试
+    confirmThen('您尚未进行任何调试。未经调试直接提交，审核员可能要求补充调试记录。\n\n确认提交？', function() {
+      toast('✓ 已提交审核（未调试）', 'warning');
+      openDrawer('skillConfig');
+    });
+  }
+}
+
+// ===== 调试工具：已拆为独立页面 page-skillDebug + page-e2eDebug =====
+// switchDebugMode 已废弃，两种调试模式通过 goPage 独立切换
+
+// 单 Skill 调试 — 文件查看器 Tab 切换（说明/文件/版本）
+function switchSfTab(el, tab) {
+  const tabs = el.parentElement.querySelectorAll('div');
+  tabs.forEach(t => {
+    t.style.color = '#6b7280';
+    t.style.borderBottomColor = 'transparent';
+    t.style.fontWeight = '400';
+    t.classList.remove('sf-tab-active');
+  });
+  el.style.color = '#2563eb';
+  el.style.borderBottomColor = '#2563eb';
+  el.style.fontWeight = '500';
+  el.classList.add('sf-tab-active');
+  // 仅交互演示，不实际切换内容（后续可对接真实数据）
+}
+
+function selectDbgFile(el, name) {
+  // 高亮当前文件项（演示）
+  const list = el.parentElement.querySelectorAll('div[onclick]');
+  list.forEach(i => { i.style.background = ''; i.style.color = '#374151'; });
+  el.style.background = '#eff6ff';
+  el.style.color = '#1e40af';
+}
+
+// 端到端调试 — 批量加白
+function addE2EWhitelist() {
+  const ta = document.getElementById('e2e-uid-input');
+  if (!ta) return;
+  const lines = ta.value.split('\n').map(s => s.trim()).filter(Boolean);
+  if (lines.length === 0) {
+    alert('请先输入需要加白的 UID（一行一个）');
+    return;
+  }
+  alert('✓ 已提交加白请求\n\n本次加白 ' + lines.length + ' 个 UID：\n' + lines.slice(0,5).join('\n') + (lines.length>5?'\n...':'') + '\n\n白名单同步耗时约 1~2 分钟，生效后这些 UID 即可扫码进入预发包调试。');
+  ta.value = '';
+}
+
+// KB Tab switching（作用域：知识库详情抽屉）
+function switchKbTab(tab) {
+  ['files','bindSkill','recallTest'].forEach(t => {
+    const el = document.getElementById('kbtab-' + t);
+    if (el) el.style.display = (t === tab) ? '' : 'none';
+  });
+  const drawer = document.getElementById('drawer-kbDetail');
+  if (drawer) {
+    drawer.querySelectorAll('.tab-item').forEach(item => {
+      item.classList.remove('active');
+      const txt = item.textContent;
+      const match = (tab === 'files' && txt.includes('内容文件')) ||
+                    (tab === 'bindSkill' && txt.includes('绑定')) ||
+                    (tab === 'recallTest' && txt.includes('召回'));
+      if (match) item.classList.add('active');
+    });
+  }
+}
+
+// KB 发布到线上 Modal
+function openKbPublishModal() {
+  openModal('kbPublish');
+}
+function confirmKbPublish() {
+  closeModal('kbPublish');
+  alert('已提交发布请求 ✓\n\n知识库正在发布到线上，预计 5~10 分钟完成。\n发布过程不会影响线上已有数据，线上 Skill 在切换瞬间无缝更换内容。\n\n你可以在 KB 列表查看发布进度（状态：发布中）。');
+  // 切换底部 CTA 状态：从 "发布更新" → "线上生效中（置灰）"
+  const idle = document.getElementById('kbPublishBtnIdle');
+  const ready = document.getElementById('kbPublishBtnReady');
+  if (idle) idle.style.display = '';
+  if (ready) ready.style.display = 'none';
+}
+
+// Recall test simulation
+function runRecallTest() {
+  const input = document.getElementById('recallInput');
+  if (input && input.value.trim()) {
+    alert('召回测试执行中...\n\nQuery: "' + input.value + '"\n\n结果：Top1 命中，相似度 0.91\n来源：FAQ #' + Math.floor(Math.random()*30+1));
+  } else {
+    alert('请输入测试 Query');
+  }
+}
+
+// ===== 创建 Skill 多步向导（本期仅"从知识库创建"路径） =====
+let csCurStep = 1;
+let csMethod = 'fromKB';
+function csReset() {
+  csCurStep = 1; csMethod = 'fromKB';
+  csUpdateUI();
+  const kbSel = document.getElementById('cs-kb-select');
+  if (kbSel) kbSel.value = '';
+}
+function csUpdateUI() {
+  document.getElementById('cs-cur').textContent = csCurStep;
+  for (let i = 1; i <= 2; i++) {
+    document.getElementById('cs-step-' + i).style.display = (i === csCurStep) ? '' : 'none';
+    const dot = document.getElementById('cs-dot-' + i);
+    const lbl = document.getElementById('cs-label-' + i);
+    if (i < csCurStep) { dot.className = 'step-dot done'; dot.innerHTML = '&#10003;'; lbl.style.color = '#059669'; lbl.style.fontWeight = '400'; }
+    else if (i === csCurStep) { dot.className = 'step-dot active'; dot.textContent = i; lbl.style.color = '#6366f1'; lbl.style.fontWeight = '500'; }
+    else { dot.className = 'step-dot'; dot.textContent = i; lbl.style.color = ''; lbl.style.fontWeight = '400'; }
+    if (i < 2) {
+      const line = document.getElementById('cs-line-' + i);
+      line.className = (i < csCurStep) ? 'step-line done' : 'step-line';
+    }
+  }
+  document.getElementById('cs-prev-btn').style.display = (csCurStep === 1) ? 'none' : '';
+  document.getElementById('cs-next-btn').style.display = (csCurStep === 2) ? 'none' : '';
+  document.getElementById('cs-finish-btn').style.display = (csCurStep === 2) ? '' : 'none';
+}
+function csNextStep() {
+  if (csCurStep === 1) {
+    const kbSel = document.getElementById('cs-kb-select');
+    if (kbSel && !kbSel.value) {
+      alert('请先选择源知识库');
+      return;
+    }
+  }
+  if (csCurStep < 2) { csCurStep++; csUpdateUI(); }
+}
+function csPrevStep() {
+  if (csCurStep > 1) { csCurStep--; csUpdateUI(); }
+}
+function csPickApproach(el) {
+  document.querySelectorAll('.cs-approach-card').forEach(c => c.classList.remove('cs-selected'));
+  el.classList.add('cs-selected');
+  el.querySelector('input[type=radio]').checked = true;
+}
+function csFinish() {
+  alert('✓ Skill 草稿已创建（来源：从知识库生成）\n\n后续流程：\n1. 查看/编辑 Skill 文件（能力描述 & 触发条件已写入 skill.yaml）\n2. 在调试工具中验证效果\n3. 编辑 C 端详情页内容（Skill 配置 → to C 数据配置）\n4. 提交审核\n\n即将进入「Skill 文件」页面。');
+  closeModal('createSkill');
+  csReset();
+  openDrawer('skillFiles');
+}
+
+// ===== Skill 文件查看器 =====
+const SF_FILES = {
+  'skill.yaml': {
+    meta: 'YAML · 36 行 · UTF-8',
+    lines: [
+      ['# Skill 元数据声明（iSkill 规范 v1）','c'],
+      ['name: sf-express-shipping','k'],
+      ['display_name: "顺丰寄件"','k'],
+      ['version: "1.0.0"','k'],
+      ['description: "帮助用户创建顺丰快递寄件订单。"','k'],
+      ['runtime: python-3.11','k'],
+      ['entry: src/handler.py:invoke','k'],
+      ['','p']
+    ]
+  },
+  'tool_schema.json': {
+    meta: 'JSON · 78 行 · UTF-8',
+    lines: [
+      ['{','p'],
+      ['  "createOrder": {','p'],
+      ['    "name": "createOrder",','k'],
+      ['    "description": "创建顺丰寄件订单",','k'],
+      ['    "parameters": {','p'],
+      ['      "type": "object",','k'],
+      ['      "properties": {','p'],
+      ['        "from_address": { "type": "string", "description": "寄件地址" },','k'],
+      ['        "to_address":   { "type": "string", "description": "收件地址" },','k'],
+      ['        "weight":       { "type": "number", "description": "包裹重量(kg)" },','k'],
+      ['        "service":      { "type": "string", "enum": ["standard","express","same_city"] }','k'],
+      ['      },','p'],
+      ['      "required": ["from_address","to_address","weight"]','k'],
+      ['    }','p'],
+      ['  },','p'],
+      ['  "queryStatus": {','p'],
+      ['    "name": "queryStatus",','k'],
+      ['    "description": "查询订单状态",','k'],
+      ['    "parameters": { "type":"object","properties":{"order_id":{"type":"string"}} }','k'],
+      ['  }','p'],
+      ['}','p']
+    ]
+  },
+  'src/handler.py': {
+    meta: 'Python · 192 行 · UTF-8',
+    lines: [
+      ['# 顺丰寄件 Skill 主入口','c'],
+      ['from typing import Dict, Any','k'],
+      ['from .utils import sign_request, post_to_sf','k'],
+      ['','p'],
+      ['SF_API_BASE = "https://open-api.sf-express.com/v3"','k'],
+      ['','p'],
+      ['def invoke(tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:','f'],
+      ['    """千问平台调用入口；根据 tool_name 路由到具体业务函数。"""','c'],
+      ['    if tool_name == "createOrder":','f'],
+      ['        return create_order(params)','f'],
+      ['    elif tool_name == "queryStatus":','f'],
+      ['        return query_status(params)','f'],
+      ['    return {"error": f"unknown tool: {tool_name}"}','f'],
+      ['','p'],
+      ['def create_order(params):','f'],
+      ['    payload = sign_request(params)','f'],
+      ['    return post_to_sf("/order/create", payload)','f'],
+      ['','p'],
+      ['def query_status(params):','f'],
+      ['    return post_to_sf("/order/status", {"orderId": params["order_id"]})','f']
+    ]
+  },
+  'src/utils.py': {
+    meta: 'Python · 68 行 · UTF-8',
+    lines: [
+      ['# 工具函数：请求签名 / HTTP 调用','c'],
+      ['import hmac, hashlib, time, requests','k'],
+      ['','p'],
+      ['def sign_request(payload: dict) -> dict:','f'],
+      ['    ts = str(int(time.time() * 1000))','f'],
+      ['    raw = ts + str(payload)','f'],
+      ['    sig = hmac.new(b"<SECRET>", raw.encode(), hashlib.sha256).hexdigest()','f'],
+      ['    return {**payload, "ts": ts, "sig": sig}','f'],
+      ['','p'],
+      ['def post_to_sf(path: str, payload: dict):','f'],
+      ['    r = requests.post(f"https://open-api.sf-express.com/v3{path}", json=payload, timeout=20)','f'],
+      ['    return r.json()','f']
+    ]
+  },
+  'README.md': {
+    meta: 'Markdown · 42 行 · UTF-8',
+    lines: [
+      ['# 顺丰寄件 Skill','h'],
+      ['','p'],
+      ['为千问平台提供"@顺丰 寄件"快速下单能力。','k'],
+      ['','p'],
+      ['## 功能','h'],
+      ['- 创建寄件订单（取件地址 / 收件地址 / 重量 / 服务）','k'],
+      ['- 查询订单状态','k'],
+      ['','p'],
+      ['## 部署','h'],
+      ['打包 .zip 上传至千问开放平台「Skill 管理 → 导入 Skill 文件」。','k'],
+      ['','p'],
+      ['## 配置','h'],
+      ['运行时密钥（API Key / Secret）通过平台 Secret 管理注入，禁止硬编码。','k']
+    ]
+  },
+  'requirements.txt': {
+    meta: 'Plain · 4 行 · UTF-8',
+    lines: [
+      ['requests==2.31.0','k'],
+      ['pydantic==2.5.0','k'],
+      ['python-dateutil==2.9.0','k'],
+      ['','p']
+    ]
+  }
+};
+const SF_COLORS = { c:'#94a3b8', k:'#e2e8f0', f:'#bae6fd', p:'#e2e8f0', h:'#fbbf24' };
+
+function selectSkillFile(el, path) {
+  const drawer = document.getElementById('drawer-skillFiles');
+  if (!drawer) return;
+  drawer.querySelectorAll('.sf-tree-item').forEach(it => {
+    it.classList.remove('active');
+    it.style.background = '';
+    it.style.color = '#374151';
+    it.style.fontWeight = '400';
+  });
+  if (el) {
+    el.classList.add('active');
+    el.style.background = '#eef2ff';
+    el.style.color = '#4338ca';
+    el.style.fontWeight = '500';
+  }
+  document.getElementById('sfCurrentPath').textContent = path;
+  const file = SF_FILES[path];
+  if (!file) return;
+  document.getElementById('sfCurrentMeta').textContent = file.meta;
+  const html = file.lines.map((row, i) => {
+    const [text, kind] = row;
+    const color = SF_COLORS[kind] || '#e2e8f0';
+    const safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<span style="display:flex;"><span style="display:inline-block;width:42px;text-align:right;padding-right:14px;color:#64748b;user-select:none;">${i+1}</span><span style="color:${color};">${safe || '&nbsp;'}</span></span>`;
+  }).join('\n');
+  document.getElementById('sfCodeContent').innerHTML = html;
+  // 同步纯文本到 textarea，便于切换到编辑模式时直接显示
+  const ta = document.getElementById('sfEditArea');
+  if (ta) ta.value = file.lines.map(r => r[0]).join('\n');
+}
+
+// 切换 查看 / 编辑 模式
+let sfEditMode = false;
+function toggleSkillFileEdit() {
+  sfEditMode = !sfEditMode;
+  const pre = document.querySelector('#sfCodeArea pre');
+  const ta = document.getElementById('sfEditArea');
+  const btn = document.getElementById('sfModeBtn');
+  const saveBtn = document.getElementById('sfSaveBtn');
+  const modeTag = document.getElementById('sfModeTag');
+  const hint = document.getElementById('sfStatusHint');
+  if (sfEditMode) {
+    // 若 textarea 还没被填充（初次未点击文件树，直接进入编辑），按当前路径回填
+    if (!ta.value) {
+      const curPath = document.getElementById('sfCurrentPath').textContent || 'skill.yaml';
+      const f = SF_FILES[curPath];
+      if (f) ta.value = f.lines.map(r => r[0]).join('\n');
+    }
+    pre.style.display = 'none';
+    ta.style.display = 'block';
+    btn.innerHTML = '&#128065; 退出编辑';
+    saveBtn.style.display = '';
+    modeTag.textContent = '编辑中';
+    modeTag.style.background = '#fef3c7';
+    modeTag.style.color = '#92400e';
+    hint.innerHTML = '&#9888; 编辑中：保存后将基于当前版本生成新草稿，需重新提交审核才能上架。';
+    ta.focus();
+  } else {
+    pre.style.display = '';
+    ta.style.display = 'none';
+    btn.innerHTML = '&#9998; 进入编辑';
+    saveBtn.style.display = 'none';
+    modeTag.textContent = '只读';
+    modeTag.style.background = '#e0f2fe';
+    modeTag.style.color = '#0369a1';
+    hint.innerHTML = '&#9432; 默认只读模式；点击右上「进入编辑」可在线修改文件内容，保存后自动产生新版本草稿。';
+  }
+}
+
+function saveSkillFileEdit() {
+  const path = document.getElementById('sfCurrentPath').textContent;
+  const ta = document.getElementById('sfEditArea');
+  const lines = ta.value.split('\n').length;
+  alert('✓ 已保存 ' + path + '（' + lines + ' 行）\n\n' +
+        '系统已基于此次修改生成新版本草稿（v1.1-draft）。\n' +
+        '若该 Skill 已上架，需在「编辑」中提交审核，审核通过后新版本才会替换线上版本。');
+  // 离开编辑态
+  toggleSkillFileEdit();
+}
+
+// Close overlay on click
+document.querySelectorAll('.drawer-overlay, .modal-overlay').forEach(el => {
+  el.addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.classList.remove('show');
+    }
+  });
+});
+
+// ========== 第二十二轮：补齐每个 btn 的交互闭环 ==========
+
+// 1) 账号 - 编辑联系人（不增 modal，inline prompt 演示）
+function editContact() {
+  const cur = '王运营 / 13800138000 / yunying@sf-express.com';
+  const next = window.prompt('编辑主要联系人（姓名 / 电话 / 邮箱，用 / 分隔）：', cur);
+  if (next && next.trim() && next !== cur) {
+    toast('联系人信息已更新（已留痕审计日志）', 'success');
+  }
+}
+
+// 2) Skill 强制下线
+function offlineSkill(name) {
+  confirmThen('确认将「' + name + '」从线上下架？\n\n下架后该 Skill 将不再被 SkillHub 召回，C 端用户无法再唤起。可在草稿态重新提交审核恢复。', function(){
+    toast('「' + name + '」已下线，状态已切换为「草稿」', 'warn');
+  });
+}
+
+// 3) Skill 配置 - 头像更换 / 保存草稿 / 解绑KB / 绑定其他KB
+function changeSkillIcon() {
+  toast('已打开本地图片选择器（仅支持 PNG/JPG，建议 256×256）', 'info');
+}
+function saveSkillConfigDraft() {
+  toast('✓ 草稿已保存到云端（最近编辑：刚刚）', 'success');
+}
+function unbindKB(btn, name) {
+  confirmThen('确认从该 Skill 移除知识库「' + name + '」？\n\n移除后此 KB 内容将不再被该 Skill 召回。', function(){
+    const card = btn.closest('.kb-bind-card');
+    if (card) { card.style.transition='opacity .2s'; card.style.opacity='0'; setTimeout(()=>card.remove(), 200); }
+    toast('已解绑知识库「' + name + '」', 'success');
+  });
+}
+function bindMoreKB() {
+  toast('打开知识库选择器（仅可选择"已生效"状态的 KB）', 'info');
+}
+
+// 4) KB 文件操作 - 预览/删除/查看修改/上传
+function previewKbFile(name) {
+  toast('打开「' + name + '」预览（解析后的结构化条目，含 chunk 边界）', 'info');
+}
+function deleteKbFile(btn, name) {
+  confirmThen('确认删除「' + name + '」？\n\n删除后该文件解析的 chunk 将进入"待发布"，需点击底部 CTA 发布到线上才会从线上 RAG 召回中移除。', function(){
+    removeRow(btn, name);
+  });
+}
+function viewKbFileDiff(name) {
+  toast('打开「' + name + '」修改对比视图（行级 diff + chunk 影响范围）', 'info');
+}
+
+// ============ v4 新增：文档级 8 态状态机操作 ============
+function filterKbFiles() {
+  const f = document.getElementById('kbFileFilter');
+  if (!f) return;
+  const val = f.value;
+  document.querySelectorAll('#kbFileTbody tr').forEach(function(tr){
+    const s = tr.getAttribute('data-status') || '';
+    if (!val) { tr.style.display = ''; return; }
+    if (val === 'processing' && (s === 'processing' || s === 'uploading' || s === 'parsing' || s === 'machine_review' || s === 'indexing')) { tr.style.display = ''; return; }
+    tr.style.display = (s === val) ? '' : 'none';
+  });
+}
+function toggleSelAllStaged(cb) {
+  document.querySelectorAll('.kbStagedCk').forEach(function(c){
+    if (c.closest('tr').style.display !== 'none') c.checked = cb.checked;
+  });
+  updateBatchOnlineBtn();
+}
+function updateBatchOnlineBtn() {
+  const list = Array.from(document.querySelectorAll('.kbStagedCk')).filter(function(c){ return c.checked && c.closest('tr').style.display !== 'none'; });
+  const btn = document.getElementById('batchOnlineBtn');
+  const cnt = document.getElementById('batchOnlineCnt');
+  if (!btn) return;
+  if (list.length === 0) { btn.style.display = 'none'; }
+  else { btn.style.display = ''; if (cnt) cnt.textContent = list.length; }
+}
+function batchOnlineStaged() {
+  const checks = Array.from(document.querySelectorAll('.kbStagedCk')).filter(function(c){ return c.checked && c.closest('tr').style.display !== 'none'; });
+  if (checks.length === 0) { toast('请勾选至少一个预发布文件', 'warn'); return; }
+  const names = checks.map(function(c){ return c.closest('tr').children[1].textContent.trim().replace(/^[^\s]+\s/, ''); });
+  confirmThen('确认上线以下 ' + checks.length + ' 个文件？\n\n' + names.join('\n') + '\n\n上线后 C 端用户立即可召回。', function(){
+    checks.forEach(function(c){
+      const tr = c.closest('tr');
+      tr.setAttribute('data-status', 'online');
+      tr.style.background = '';
+      // 更新状态 tag
+      const cell = tr.children[4];
+      if (cell) cell.innerHTML = '<span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span>';
+      // 更新行内操作按钮
+      const opCell = tr.children[6];
+      if (opCell) {
+        const fname = tr.children[1].textContent.trim();
+        opCell.innerHTML = '<button class="btn btn-sm btn-ghost" onclick="previewKbFile(\'' + fname + '\')">预览</button> '
+          + '<button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,\'' + fname + '\')">下线</button> '
+          + '<button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,\'' + fname + '\',\'online\')">删除</button>';
+      }
+      c.checked = false;
+      c.disabled = true;
+      c.parentElement.textContent = '—';
+    });
+    updateBatchOnlineBtn();
+    toast('✅ 已上线 ' + checks.length + ' 个文件', 'success');
+  });
+}
+function onlineKbDoc(btn, name) {
+  confirmThen('确认上线「' + name + '」？\n\n上线后 C 端用户立即可召回该内容。', function(){
+    const tr = btn.closest('tr');
+    tr.setAttribute('data-status', 'online');
+    tr.style.background = '';
+    tr.children[4].innerHTML = '<span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span>';
+    tr.children[6].innerHTML = '<button class="btn btn-sm btn-ghost" onclick="previewKbFile(\'' + name + '\')">预览</button> '
+      + '<button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,\'' + name + '\')">下线</button> '
+      + '<button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,\'' + name + '\',\'online\')">删除</button>';
+    const ck = tr.querySelector('.kbStagedCk'); if (ck) { ck.disabled = true; ck.checked = false; ck.parentElement.textContent = '—'; }
+    updateBatchOnlineBtn();
+    toast('✅「' + name + '」已上线，C 端可召回', 'success');
+  });
+}
+function offlineKbDoc(btn, name) {
+  confirmThen('确认下线「' + name + '」？\n\n下线后 C 端用户不再召回该内容（仅 doc_status 翻 flag，不重建索引）。\n\n如需替换内容：下线后再删除并重新上传新文件（本期不支持版本中转）。', function(){
+    const tr = btn.closest('tr');
+    tr.setAttribute('data-status', 'offline');
+    tr.style.opacity = '0.7';
+    tr.children[4].innerHTML = '<span class="tag" style="background:#f3f4f6;color:#6b7280;font-size:10px;">⚪ 已下线</span>';
+    tr.children[6].innerHTML = '<button class="btn btn-sm btn-ghost" onclick="previewKbFile(\'' + name + '\')">预览</button> '
+      + '<button class="btn btn-sm btn-primary" onclick="reonlineKbDoc(this,\'' + name + '\')">重新上线</button> '
+      + '<button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,\'' + name + '\',\'offline\')">删除</button>';
+    toast('⚪「' + name + '」已下线', 'info');
+  });
+}
+function reonlineKbDoc(btn, name) {
+  const tr = btn.closest('tr');
+  tr.setAttribute('data-status', 'online');
+  tr.style.opacity = '';
+  tr.children[4].innerHTML = '<span class="tag" style="background:#dcfce7;color:#166534;font-size:10px;">✅ 已上线</span>';
+  tr.children[6].innerHTML = '<button class="btn btn-sm btn-ghost" onclick="previewKbFile(\'' + name + '\')">预览</button> '
+    + '<button class="btn btn-sm btn-ghost" onclick="offlineKbDoc(this,\'' + name + '\')">下线</button> '
+    + '<button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="deleteKbDoc(this,\'' + name + '\',\'online\')">删除</button>';
+  toast('✅「' + name + '」已重新上线', 'success');
+}
+function deleteKbDoc(btn, name, fromStatus) {
+  // 双确认：先 confirm 再要求输入文件名
+  const recallHint = (fromStatus === 'online') ? '\n\n该文件最近 7 天被 Skill 召回 124 次，删除后这部分用户问询将无法回答。' : '';
+  if (!window.confirm('确认删除「' + name + '」？' + recallHint + '\n\n物理删除（含索引向量异步 GC），不可恢复。\n\n点击确定后还需输入文件名兜底确认。')) return;
+  const typed = window.prompt('请输入文件名「' + name + '」以确认删除：');
+  if (typed !== name) {
+    toast('文件名不匹配，删除已取消', 'warn');
+    return;
+  }
+  removeRow(btn, name);
+  toast('🗑️「' + name + '」已删除（异步清理向量索引中）', 'success');
+}
+function toggleRecallSimC(cb) {
+  if (cb.checked) toast('🔒 已切到「仅模拟 C 端」：召回范围收紧为 doc_status=online', 'info');
+  else toast('🔓 已切回「全量已索引」：召回范围 = staged∪online∪offline', 'info');
+}
+function toggleDbgSimC(cb) {
+  if (cb.checked) toast('🔒 调试 KB 召回已收紧为 C 端真实范围（仅 ✅ 已上线）', 'info');
+  else toast('🔓 调试 KB 召回恢复为全量已索引（含 🟠 预发布 / ⚪ 已下线）', 'info');
+}
+
+// 5) KB 详情 - 编辑基本信息 / 绑定新 Skill / 解绑 Skill
+function editKbBasicInfo() {
+  const next = window.prompt('编辑知识库名称：', '顺丰寄件知识库');
+  if (next && next.trim()) toast('已更新知识库名称为「' + next.trim() + '」', 'success');
+}
+function bindSkillToKB() {
+  toast('打开 Skill 选择器：勾选后该 Skill 将增加一条 KB 绑定关系', 'info');
+}
+function unbindSkillFromKB(btn, name) {
+  confirmThen('确认将该知识库与「' + name + '」解绑？\n\n解绑后「' + name + '」不再调用本知识库内容。', function(){
+    removeRow(btn, name);
+  });
+}
+
+// 6) 调试 - 发送 / 清空 / 导出
+let dbgChatCount = 0;
+function sendDebugMessage() {
+  const input = document.getElementById('dbgChatInput');
+  if (!input || !input.value.trim()) { toast('请输入测试 Query', 'warn'); return; }
+  const host = document.getElementById('dbgChatBubbles');
+  if (!host) return;
+  const q = input.value.trim();
+  // 用户气泡
+  const userBubble = document.createElement('div');
+  userBubble.style.cssText = 'display:flex;gap:8px;margin-bottom:12px;justify-content:flex-end;';
+  userBubble.innerHTML = '<div><div style="font-size:11px;color:#9ca3af;margin-bottom:4px;text-align:right;">你</div><div style="background:#2563eb;color:#fff;border-radius:10px 0 10px 10px;padding:10px 14px;font-size:13px;line-height:1.6;max-width:340px;">' + q + '</div></div><div style="width:28px;height:28px;background:#dbeafe;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;">&#128100;</div>';
+  host.appendChild(userBubble);
+  input.value = '';
+  // bot loading
+  const loading = document.createElement('div');
+  loading.style.cssText = 'display:flex;gap:8px;margin-bottom:12px;';
+  loading.innerHTML = '<div style="width:28px;height:28px;background:#ede9fe;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;">&#129302;</div><div><div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">Skill</div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:0 10px 10px 10px;padding:10px 14px;font-size:13px;color:#9ca3af;line-height:1.6;max-width:340px;">思考中…</div></div>';
+  host.appendChild(loading);
+  host.scrollTop = host.scrollHeight;
+  setTimeout(()=>{
+    loading.querySelector('div:last-child > div:last-child').innerHTML =
+      '<details><summary style="cursor:pointer;font-size:11px;color:#2563eb;margin-bottom:6px;">&#128736; 工具调用：calc_shipping_fee(from=北京, to=上海, weight=5kg)</summary><pre style="background:#f3f4f6;padding:6px;border-radius:4px;font-size:10px;margin:6px 0;">{"price":42,"service":"标快","eta":"1.5天"}</pre></details>' +
+      '<details><summary style="cursor:pointer;font-size:11px;color:#059669;margin-bottom:6px;">&#128218; KB 召回 Top 3 chunk</summary><div style="font-size:10px;color:#6b7280;margin:6px 0;">FAQ #18 (sim 0.91) · 寄件标准2026 §3 (sim 0.83) · 禁寄物品清单 §1 (sim 0.71)</div></details>' +
+      '<div style="color:#374151;line-height:1.6;">从北京寄 5kg 到上海，标快约 ¥42，预计 1.5 天送达。如需更快可选特快（¥68，次日达）。</div>';
+    loading.querySelector('div:last-child > div:last-child').style.color = '#374151';
+    host.scrollTop = host.scrollHeight;
+    dbgChatCount++;
+  }, 700);
+}
+function clearDebugChat() {
+  confirmThen('确认清空当前调试会话？\n\n清空后历史气泡不可恢复（已自动归档到调试历史）。', function(){
+    const host = document.getElementById('dbgChatBubbles');
+    if (host) host.innerHTML = '<div style="text-align:center;padding:40px 0;color:#9ca3af;font-size:12px;">会话已清空，开始新一轮调试…</div>';
+    toast('对话已清空', 'success');
+  });
+}
+function exportDebugChat() {
+  toast('已导出调试会话日志为 .json（含工具调用入参/出参/KB 召回明细）', 'success');
+}
+
+// 7) 弹窗 - 资质表单提交 / KB 创建 / Skill 导入 / 从知识库创建 Skill
+function submitQualForm() {
+  // 简单校验示意
+  const required = ['营业执照', '品牌权属证明', '类目资质'];
+  if (!confirm('提交后将进入平台审核队列，平均审核时长 1~3 个工作日。\n\n确认提交以下材料：\n· ' + required.join('\n· '))) return;
+  closeDrawer('qualForm');
+  toast('✓ 资质材料已提交审核，预计 1~3 个工作日反馈结果', 'success');
+}
+function confirmImportSkill() {
+  toast('✓ Skill 包解析完成，已创建草稿。3 秒后跳转到配置页…', 'success');
+  setTimeout(()=>{ closeModal('importSkill'); openDrawer('skillConfig'); }, 800);
+}
+function confirmCreateKB() {
+  toast('✓ 知识库已创建，正在解析上传文件…（解析完成后状态会从"索引中"切换为"已生效"）', 'success');
+  setTimeout(()=>closeModal('createKB'), 600);
+}
+function confirmGenSkill() {
+  toast('✓ Skill 草稿已创建 — 来源 KB 已自动绑定，能力描述/触发条件已写入 skill.yaml', 'success');
+  setTimeout(()=>{ closeModal('genSkill'); openDrawer('skillFiles'); }, 800);
+}
+
+</script>
+</body>
+</html>
