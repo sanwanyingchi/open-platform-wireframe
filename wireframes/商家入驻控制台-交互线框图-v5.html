@@ -1413,7 +1413,7 @@ tr:hover td { background: #fafaff; }
       <!-- ===== PAGE: 端到端调试 ===== -->
       <div class="page" id="page-e2eDebug">
         <div class="wireframe-note">
-          <strong>页面说明（端到端调试）：</strong>覆盖完整 C 端链路（Skill 路由 → 工具调用 → KB 召回 → 大模型生成 → 详情页渲染）。流程：添加测试 UID 白名单 → 扫码进入预发包 → 真机对话验证。推荐在 Skill 调试后使用，但不强制。调试记录将作为审核参考信号。
+          <strong>页面说明（端到端调试）：</strong>覆盖完整 C 端链路（Skill 路由 → 工具调用 → KB 召回 → 大模型生成 → 详情页渲染）。流程：联系千问工作人员配置路由意图 → 输入测试手机号加白 → 扫码进入预发包 → 真机对话验证。推荐在 Skill 调试后使用，但不强制。调试记录将作为审核参考信号。
         </div>
 
         <!-- 推荐流程 banner -->
@@ -1425,62 +1425,68 @@ tr:hover td { background: #fafaff; }
           <button class="btn btn-sm" onclick="goPage('skillDebug')">&#8592; 返回 Skill 调试</button>
         </div>
 
+        <!-- 路由意图配置前置提醒 -->
+        <div style="background:#fef2f2;border:1px solid #fecaca;border-left:3px solid #dc2626;border-radius:6px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:flex-start;gap:10px;">
+          <span style="font-size:16px;flex-shrink:0;">📞</span>
+          <div style="font-size:12px;color:#991b1b;line-height:1.7;">
+            <strong>前置步骤：</strong>新 Skill 端到端调试前，请先联系千问工作人员在调试环境配置 Skill 对应的路由意图。配置成功后，方可在本页面完整体验到线上对话效果。<br>
+            <span style="color:#6b7280;">联系方式：千问开放平台运营群 / 对接产品经理 · 配置通常在 1 个工作日内完成</span>
+          </div>
+        </div>
+
         <!-- 端到端说明 -->
         <div style="background:#fef3c7;border-left:3px solid #d97706;padding:12px 14px;border-radius:6px;font-size:12px;color:#92400e;line-height:1.7;margin-bottom:16px;">
-          <strong>⚠ 端到端调试说明：</strong>覆盖完整 C 端链路（Skill 路由 → 工具调用 → KB 召回 → 大模型生成 → 详情页渲染）。流程：① 在下方输入需要加白的测试 UID；② 平台将 UID 加入预发白名单；③ 用对应账号扫描右侧二维码进入预发包；④ 在真实千问 App 内对话验证 Skill 唤起与回答效果。<br>
+          <strong>⚠ 端到端调试说明：</strong>覆盖完整 C 端链路（Skill 路由 → 工具调用 → KB 召回 → 大模型生成 → 详情页渲染）。流程：① 确认路由意图已由千问工作人员配置完成；② 在下方输入测试手机号；③ 平台将该手机号加入预发白名单；④ 用对应手机号登录千问 App 扫描右侧二维码进入预发包；⑤ 在真实千问 App 内对话验证 Skill 唤起与回答效果。<br>
           <strong style="color:#dc2626;">KB 召回范围 = 全量已索引（含 🟠 预发布 / ⚪ 已下线）</strong>，目的是"上线前在真机走一遍流程"。文件需点击「上线」后才对真实 C 端用户可见。
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 360px;gap:16px;">
 
-          <!-- 左：UID 加白名单管理 -->
+          <!-- 左：测试手机号管理 -->
           <div class="card" style="margin:0;">
             <div class="card-title">
-              测试 UID 白名单管理
+              测试手机号白名单管理
               <span style="font-size:11px;color:#9ca3af;font-weight:400;margin-left:auto;">已加白 <strong style="color:#059669;">3</strong> / 上限 50</span>
             </div>
 
             <!-- 批量输入 -->
             <div style="margin-bottom:14px;">
-              <div style="font-size:12px;color:#374151;margin-bottom:6px;font-weight:500;">批量录入测试 UID</div>
-              <textarea class="form-textarea" id="e2e-uid-input" placeholder="一行一个 UID，支持批量粘贴。例如：&#10;2088xxxxxxxxxxxx1&#10;2088xxxxxxxxxxxx2&#10;tb_user_zhangsan" style="min-height:90px;font-family:Menlo,Consolas,monospace;font-size:12px;"></textarea>
+              <div style="font-size:12px;color:#374151;margin-bottom:6px;font-weight:500;">录入测试手机号</div>
+              <textarea class="form-textarea" id="e2e-uid-input" placeholder="一行一个手机号，支持批量粘贴。例如：&#10;138xxxx1234&#10;159xxxx5678&#10;186xxxx9012" style="min-height:90px;font-family:Menlo,Consolas,monospace;font-size:12px;"></textarea>
               <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
-                <div style="font-size:11px;color:#9ca3af;">支持淘宝 / 支付宝 / 千问账号 UID。每个商家最多加白 50 个测试账号</div>
+                <div style="font-size:11px;color:#9ca3af;">输入千问 App 注册手机号。每个商家最多加白 50 个测试号码</div>
                 <button class="btn btn-primary btn-sm" onclick="addE2EWhitelist()">&#9989; 提交加白</button>
               </div>
             </div>
 
             <!-- 已加白列表 -->
             <div style="border-top:1px solid #f3f4f6;padding-top:14px;">
-              <div style="font-size:12px;color:#374151;margin-bottom:8px;font-weight:500;">当前已加白 UID</div>
+              <div style="font-size:12px;color:#374151;margin-bottom:8px;font-weight:500;">当前已加白手机号</div>
               <table style="font-size:12px;">
                 <thead>
-                  <tr><th>UID</th><th>账号类型</th><th>加白时间</th><th>最近调试</th><th>状态</th><th>操作</th></tr>
+                  <tr><th>手机号</th><th>加白时间</th><th>最近调试</th><th>状态</th><th>操作</th></tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td style="font-family:Menlo,monospace;">2088xxxxxxxx5821</td>
-                    <td><span class="tag" style="background:#dbeafe;color:#1e40af;font-size:10px;">支付宝</span></td>
+                    <td style="font-family:Menlo,monospace;">138****1234</td>
                     <td>2026-06-16 10:24</td>
                     <td>2026-06-16 14:08</td>
                     <td><span class="tag tag-online">已生效</span></td>
-                    <td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="removeRow(this,'2088xxxxxxxx5821')">移除</button></td>
+                    <td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="removeRow(this,'138****1234')">移除</button></td>
                   </tr>
                   <tr>
-                    <td style="font-family:Menlo,monospace;">tb_user_zhangsan</td>
-                    <td><span class="tag" style="background:#fff7ed;color:#c2410c;font-size:10px;">淘宝</span></td>
+                    <td style="font-family:Menlo,monospace;">159****5678</td>
                     <td>2026-06-16 10:24</td>
                     <td>2026-06-16 13:52</td>
                     <td><span class="tag tag-online">已生效</span></td>
-                    <td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="removeRow(this,'tb_user_zhangsan')">移除</button></td>
+                    <td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="removeRow(this,'159****5678')">移除</button></td>
                   </tr>
                   <tr>
-                    <td style="font-family:Menlo,monospace;">qw_uid_8821007</td>
-                    <td><span class="tag" style="background:#ede9fe;color:#6d28d9;font-size:10px;">千问</span></td>
+                    <td style="font-family:Menlo,monospace;">186****9012</td>
                     <td>2026-06-16 10:25</td>
                     <td>—</td>
                     <td><span class="tag" style="background:#fef3c7;color:#92400e;font-size:10px;">同步中</span></td>
-                    <td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="removeRow(this,'qw_uid_8821007')">移除</button></td>
+                    <td><button class="btn btn-sm btn-ghost" style="color:#dc2626;" onclick="removeRow(this,'186****9012')">移除</button></td>
                   </tr>
                 </tbody>
               </table>
@@ -1491,7 +1497,7 @@ tr:hover td { background: #fafaff; }
           <div class="card" style="margin:0;text-align:center;">
             <div class="card-title" style="justify-content:center;">预发包扫码入口</div>
             <div style="margin:6px 0 14px;font-size:12px;color:#6b7280;line-height:1.7;">
-              使用<strong>已加白</strong>的账号在手机上登录千问 App<br>扫描下方二维码进入预发环境
+              使用<strong>已加白</strong>的手机号在千问 App 登录<br>扫描下方二维码进入预发环境
             </div>
 
             <!-- 二维码 -->
@@ -1536,11 +1542,11 @@ tr:hover td { background: #fafaff; }
         <div class="card" style="margin-top:18px;">
           <div class="card-title">调试历史（端到端）</div>
           <table>
-            <thead><tr><th>时间</th><th>UID</th><th>测试 Query</th><th>结果</th><th>响应时长</th></tr></thead>
+            <thead><tr><th>时间</th><th>手机号</th><th>测试 Query</th><th>结果</th><th>响应时长</th></tr></thead>
             <tbody>
-              <tr><td>2026-06-16 14:08</td><td>2088...5821</td><td>从北京寄5公斤到上海多少钱</td><td><span class="tag tag-online">通过</span></td><td>1.6s</td></tr>
-              <tr><td>2026-06-16 13:52</td><td>tb_user_zhangsan</td><td>顺丰特快和标快哪个划算</td><td><span class="tag tag-online">通过</span></td><td>2.1s</td></tr>
-              <tr><td>2026-06-16 13:48</td><td>2088...5821</td><td>国际件怎么寄到日本</td><td><span class="tag tag-online">通过</span></td><td>1.9s</td></tr>
+              <tr><td>2026-06-16 14:08</td><td>138****1234</td><td>从北京寄5公斤到上海多少钱</td><td><span class="tag tag-online">通过</span></td><td>1.6s</td></tr>
+              <tr><td>2026-06-16 13:52</td><td>159****5678</td><td>顺丰特快和标快哪个划算</td><td><span class="tag tag-online">通过</span></td><td>2.1s</td></tr>
+              <tr><td>2026-06-16 13:48</td><td>138****1234</td><td>国际件怎么寄到日本</td><td><span class="tag tag-online">通过</span></td><td>1.9s</td></tr>
             </tbody>
           </table>
         </div>
